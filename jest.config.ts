@@ -9,4 +9,4 @@ module.exports = {
     escapeString: true,
     printBasicPrototype: true,
   },
-};
+}

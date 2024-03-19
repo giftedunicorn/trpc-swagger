@@ -1,20 +1,13 @@
-![trpc-swagger](assets/trpc-swagger-readme.png)
+![trpc-openapi](assets/trpc-openapi-readme.png)
 
 <div align="center">
-  <h1>trpc-swagger</h1>
-  <a href="https://www.npmjs.com/package/trpc-swagger"><img src="https://img.shields.io/npm/v/trpc-swagger.svg?style=flat&color=brightgreen" target="_blank" /></a>
+  <h1>trpc-openapi</h1>
+  <a href="https://www.npmjs.com/package/trpc-openapi"><img src="https://img.shields.io/npm/v/trpc-openapi.svg?style=flat&color=brightgreen" target="_blank" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" /></a>
   <a href="https://trpc.io/discord" target="_blank"><img src="https://img.shields.io/badge/chat-discord-blue.svg" /></a>
   <br />
   <hr />
 </div>
-
-#### `trpc-swagger` is maintained by ProsePilot - simple, fast and free online [writing tools](https://www.prosepilot.com/tools).
-
----
-
-## Fork Notice    
-this repo originally came from [trpc-openapi](https://github.com/jlalmes/trpc-openapi) and has been modify as the old repo appears to no longer be maintained. 
 
 ## **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
 
@@ -24,22 +17,22 @@ this repo originally came from [trpc-openapi](https://github.com/jlalmes/trpc-op
 
 ## Usage
 
-**1. Install `trpc-swagger`.**
+**1. Install `trpc-openapi`.**
 
 ```bash
 # npm
-npm install trpc-swagger
+npm install trpc-openapi
 # yarn
-yarn add trpc-swagger
+yarn add trpc-openapi
 ```
 
 **2. Add `OpenApiMeta` to your tRPC instance.**
 
 ```typescript
-import { initTRPC } from '@trpc/server';
-import { OpenApiMeta } from 'trpc-swagger';
+import { initTRPC } from '@trpc/server'
+import { OpenApiMeta } from 'trpc-openapi'
 
-const t = initTRPC.meta<OpenApiMeta>().create(); /* 👈 */
+const t = initTRPC.meta<OpenApiMeta>().create() /* 👈 */
 ```
 
 **3. Enable `openapi` support for a procedure.**
@@ -51,49 +44,49 @@ export const appRouter = t.router({
     .input(z.object({ name: z.string() }))
     .output(z.object({ greeting: z.string() }))
     .query(({ input }) => {
-      return { greeting: `Hello ${input.name}!` };
-    }),
-});
+      return { greeting: `Hello ${input.name}!` }
+    })
+})
 ```
 
 **4. Generate an OpenAPI document.**
 
 ```typescript
-import { generateOpenApiDocument } from 'trpc-swagger';
+import { generateOpenApiDocument } from 'trpc-openapi'
 
-import { appRouter } from '../appRouter';
+import { appRouter } from '../appRouter'
 
 /* 👇 */
 export const openApiDocument = generateOpenApiDocument(appRouter, {
   title: 'tRPC OpenAPI',
   version: '1.0.0',
   baseUrl: 'http://localhost:3000',
-});
+})
 ```
 
-**5. Add an `trpc-swagger` handler to your app.**
+**5. Add an `trpc-openapi` handler to your app.**
 
 We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
 
 [`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Cloudflare Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
 
 ```typescript
-import http from 'http';
-import { createOpenApiHttpHandler } from 'trpc-swagger';
+import http from 'http'
+import { createOpenApiHttpHandler } from 'trpc-openapi'
 
-import { appRouter } from '../appRouter';
+import { appRouter } from '../appRouter'
 
-const server = http.createServer(createOpenApiHttpHandler({ router: appRouter })); /* 👈 */
+const server = http.createServer(createOpenApiHttpHandler({ router: appRouter })) /* 👈 */
 
-server.listen(3000);
+server.listen(3000)
 ```
 
 **6. Profit 🤑**
 
 ```typescript
 // client.ts
-const res = await fetch('http://localhost:3000/say-hello?name=James', { method: 'GET' });
-const body = await res.json(); /* { greeting: 'Hello James!' } */
+const res = await fetch('http://localhost:3000/say-hello?name=James', { method: 'GET' })
+const body = await res.json() /* { greeting: 'Hello James!' } */
 ```
 
 ## Requirements
@@ -138,15 +131,15 @@ export const appRouter = t.router({
     .input(z.object({ name: z.string() /* 👈 */, greeting: z.string() }))
     .output(z.object({ greeting: z.string() }))
     .query(({ input }) => {
-      return { greeting: `${input.greeting} ${input.name}!` };
-    }),
-});
+      return { greeting: `${input.greeting} ${input.name}!` }
+    })
+})
 
 // Client
 const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /* 👈 */, {
   method: 'GET',
-});
-const body = await res.json(); /* { greeting: 'Hello James!' } */
+})
+const body = await res.json() /* { greeting: 'Hello James!' } */
 ```
 
 ### Request body
@@ -159,17 +152,17 @@ export const appRouter = t.router({
     .input(z.object({ name: z.string() /* 👈 */, greeting: z.string() }))
     .output(z.object({ greeting: z.string() }))
     .mutation(({ input }) => {
-      return { greeting: `${input.greeting} ${input.name}!` };
-    }),
-});
+      return { greeting: `${input.greeting} ${input.name}!` }
+    })
+})
 
 // Client
 const res = await fetch('http://localhost:3000/say-hello/James' /* 👈 */, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ greeting: 'Hello' }),
-});
-const body = await res.json(); /* { greeting: 'Hello James!' } */
+})
+const body = await res.json() /* { greeting: 'Hello James!' } */
 ```
 
 ### Custom headers
@@ -180,7 +173,31 @@ Any custom headers can be specified in the `meta.openapi.headers` array, these h
 
 Status codes will be `200` by default for any successful requests. In the case of an error, the status code will be derived from the thrown `TRPCError` or fallback to `500`.
 
-You can modify the status code or headers for any response using the `responseMeta` function.
+You can modify the status code or headers for any response using the `responseMeta` function. Extra responses can be documented in the `meta.openapi.extraResponses` field.
+
+```typescript
+// Router
+
+export const appRouter = t.router({
+  sayHello: t.procedure
+    .meta({ openapi: {
+      method: 'POST',
+      path: '/say-hello/{name}',
+      extraResponses: {
+          400: {
+            description: 'Bad request',
+            content: z.object({ reason: z.string().describe("The reason") }),
+          },
+      }
+    }})
+    .input(z.object({ name: z.string(), greeting: z.string() }))
+    .output(z.object({ greeting: z.string() }))
+    .mutation(({ input }) => {
+      return { greeting: `${input.greeting} ${input.name}!` }
+    })
+})
+
+```
 
 Please see [error status codes here](src/adapters/node-http/errors.ts).
 
@@ -193,30 +210,30 @@ Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 #### Server
 
 ```typescript
-import { TRPCError, initTRPC } from '@trpc/server';
-import { OpenApiMeta } from 'trpc-swagger';
+import { TRPCError, initTRPC } from '@trpc/server'
+import { OpenApiMeta } from 'trpc-openapi'
 
-type User = { id: string; name: string };
+type User = { id: string name: string }
 
 const users: User[] = [
   {
     id: 'usr_123',
     name: 'James',
   },
-];
+]
 
-export type Context = { user: User | null };
+export type Context = { user: User | null }
 
 export const createContext = async ({ req, res }): Promise<Context> => {
-  let user: User | null = null;
+  let user: User | null = null
   if (req.headers.authorization) {
-    const userId = req.headers.authorization.split(' ')[1];
-    user = users.find((_user) => _user.id === userId);
+    const userId = req.headers.authorization.split(' ')[1]
+    user = users.find((_user) => _user.id === userId)
   }
-  return { user };
-};
+  return { user }
+}
 
-const t = initTRPC.context<Context>().meta<OpenApiMeta>().create();
+const t = initTRPC.context<Context>().meta<OpenApiMeta>().create()
 
 export const appRouter = t.router({
   sayHello: t.procedure
@@ -225,11 +242,11 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input, ctx }) => {
       if (!ctx.user) {
-        throw new TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' });
+        throw new TRPCError({ message: 'User not found', code: 'UNAUTHORIZED' })
       }
-      return { greeting: `Hello ${ctx.user.name}!` };
+      return { greeting: `Hello ${ctx.user.name}!` }
     }),
-});
+})
 ```
 
 #### Client
@@ -238,8 +255,8 @@ export const appRouter = t.router({
 const res = await fetch('http://localhost:3000/say-hello', {
   method: 'GET',
   headers: { Authorization: 'Bearer usr_123' } /* 👈 */,
-});
-const body = await res.json(); /* { greeting: 'Hello James!' } */
+})
+const body = await res.json() /* { greeting: 'Hello James!' } */
 ```
 
 ## Examples
@@ -251,18 +268,18 @@ _For advanced use-cases, please find examples in our [complete test suite](test)
 Please see [full example here](examples/with-express).
 
 ```typescript
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import express from 'express';
-import { createOpenApiExpressMiddleware } from 'trpc-swagger';
+import { createExpressMiddleware } from '@trpc/server/adapters/express'
+import express from 'express'
+import { createOpenApiExpressMiddleware } from 'trpc-openapi'
 
-import { appRouter } from '../appRouter';
+import { appRouter } from '../appRouter'
 
-const app = express();
+const app = express()
 
-app.use('/api/trpc', createExpressMiddleware({ router: appRouter }));
-app.use('/api', createOpenApiExpressMiddleware({ router: appRouter })); /* 👈 */
+app.use('/api/trpc', createExpressMiddleware({ router: appRouter }))
+app.use('/api', createOpenApiExpressMiddleware({ router: appRouter })) /* 👈 */
 
-app.listen(3000);
+app.listen(3000)
 ```
 
 #### With Next.js
@@ -271,11 +288,11 @@ Please see [full example here](examples/with-nextjs).
 
 ```typescript
 // pages/api/[...trpc].ts
-import { createOpenApiNextHandler } from 'trpc-swagger';
+import { createOpenApiNextHandler } from 'trpc-openapi'
 
-import { appRouter } from '../../server/appRouter';
+import { appRouter } from '../../server/appRouter'
 
-export default createOpenApiNextHandler({ router: appRouter });
+export default createOpenApiNextHandler({ router: appRouter })
 ```
 
 #### With AWS Lambda
@@ -283,11 +300,11 @@ export default createOpenApiNextHandler({ router: appRouter });
 Please see [full example here](examples/with-serverless).
 
 ```typescript
-import { createOpenApiAwsLambdaHandler } from 'trpc-swagger';
+import { createOpenApiAwsLambdaHandler } from 'trpc-openapi'
 
-import { appRouter } from './appRouter';
+import { appRouter } from './appRouter'
 
-export const openApi = createOpenApiAwsLambdaHandler({ router: appRouter });
+export const openApi = createOpenApiAwsLambdaHandler({ router: appRouter })
 ```
 
 #### With Fastify
@@ -295,22 +312,22 @@ export const openApi = createOpenApiAwsLambdaHandler({ router: appRouter });
 Please see [full example here](examples/with-fastify).
 
 ```typescript
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify';
-import Fastify from 'fastify';
-import { fastifyTRPCOpenApiPlugin } from 'trpc-swagger';
+import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify'
+import Fastify from 'fastify'
+import { fastifyTRPCOpenApiPlugin } from 'trpc-openapi'
 
-import { appRouter } from './router';
+import { appRouter } from './router'
 
-const fastify = Fastify();
+const fastify = Fastify()
 
 async function main() {
-  await fastify.register(fastifyTRPCPlugin, { router: appRouter });
-  await fastify.register(fastifyTRPCOpenApiPlugin, { router: appRouter }); /* 👈 */
+  await fastify.register(fastifyTRPCPlugin, { router: appRouter })
+  await fastify.register(fastifyTRPCOpenApiPlugin, { router: appRouter }) /* 👈 */
 
-  await fastify.listen({ port: 3000 });
+  await fastify.listen({ port: 3000 })
 }
 
-main();
+main()
 ```
 
 ## Types
@@ -333,18 +350,21 @@ Please see [full typings here](src/generator/index.ts).
 
 Please see [full typings here](src/types.ts).
 
-| Property       | Type                | Description                                                                                          | Required | Default                |
-| -------------- | ------------------- | ---------------------------------------------------------------------------------------------------- | -------- | ---------------------- |
-| `enabled`      | `boolean`           | Exposes this procedure to `trpc-swagger` adapters and on the OpenAPI document.                       | `false`  | `true`                 |
-| `method`       | `HttpMethod`        | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.     | `true`   | `undefined`            |
-| `path`         | `string`            | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`. | `true`   | `undefined`            |
-| `protect`      | `boolean`           | Requires this endpoint to use a security scheme.                                                     | `false`  | `false`                |
-| `summary`      | `string`            | A short summary of the endpoint included in the OpenAPI document.                                    | `false`  | `undefined`            |
-| `description`  | `string`            | A verbose description of the endpoint included in the OpenAPI document.                              | `false`  | `undefined`            |
-| `tags`         | `string[]`          | A list of tags used for logical grouping of endpoints in the OpenAPI document.                       | `false`  | `undefined`            |
-| `headers`      | `ParameterObject[]` | An array of custom headers to add for this endpoint in the OpenAPI document.                         | `false`  | `undefined`            |
-| `contentTypes` | `ContentType[]`     | A set of content types specified as accepted in the OpenAPI document.                                | `false`  | `['application/json']` |
-| `deprecated`   | `boolean`           | Whether or not to mark an endpoint as deprecated                                                     | `false`  | `false`                |
+| Property         | Type                               | Description                                                                                                        | Required | Default                |
+| ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
+| `enabled`        | `boolean`                          | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `false`  | `true`                 |
+| `method`         | `HttpMethod`                       | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.                   | `true`   | `undefined`            |
+| `path`           | `string`                           | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined`            |
+| `protect`        | `boolean`                          | Requires this endpoint to use a security scheme.                                                                   | `false`  | `false`                |
+| `summary`        | `string`                           | A short summary of the endpoint included in the OpenAPI document.                                                  | `false`  | `undefined`            |
+| `description`    | `string`                           | A verbose description of the endpoint included in the OpenAPI document.                                            | `false`  | `undefined`            |
+| `tags`           | `string[]`                         | A list of tags used for logical grouping of endpoints in the OpenAPI document.                                     | `false`  | `undefined`            |
+| `headers`        | `ParameterObject[]`                | An array of custom headers to add for this endpoint in the OpenAPI document.                                       | `false`  | `undefined`            |
+| `contentTypes`   | `ContentType[]`                    | A set of content types specified as accepted in the OpenAPI document.                                              | `false`  | `['application/json']` |
+| `extraResponses` | `ResponsesObject`* | An array of custom responses to add for this endpoint in the OpenAPI document in addition to the default response. | `false`  | `undefined`            |
+| `deprecated`     | `boolean`                          | Whether or not to mark an endpoint as deprecated                                                                   | `false`  | `false`                |
+
+* _The `content` field in ResponsesObject is expected to be a `z.ZodType`_
 
 #### CreateOpenApiNodeHttpHandlerOptions
 

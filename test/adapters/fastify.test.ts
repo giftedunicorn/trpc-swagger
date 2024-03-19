@@ -1,33 +1,33 @@
-import { initTRPC } from '@trpc/server';
-import fastify from 'fastify';
-import fetch from 'node-fetch';
-import { z } from 'zod';
+import { initTRPC } from '@trpc/server'
+import fastify from 'fastify'
+import fetch from 'node-fetch'
+import { z } from 'zod'
 
 import {
   CreateOpenApiFastifyPluginOptions,
   OpenApiMeta,
   OpenApiRouter,
   fastifyTRPCOpenApiPlugin,
-} from '../../src';
+} from '../../src'
 
-const createContextMock = jest.fn();
-const responseMetaMock = jest.fn();
-const onErrorMock = jest.fn();
+const createContextMock = jest.fn()
+const responseMetaMock = jest.fn()
+const onErrorMock = jest.fn()
 
 const clearMocks = () => {
-  createContextMock.mockClear();
-  responseMetaMock.mockClear();
-  onErrorMock.mockClear();
-};
+  createContextMock.mockClear()
+  responseMetaMock.mockClear()
+  onErrorMock.mockClear()
+}
 
 const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
   handler: CreateOpenApiFastifyPluginOptions<TRouter>,
   opts?: {
-    serverOpts?: { basePath?: `/${string}` };
-    prefix?: string;
+    serverOpts?: { basePath?: `/${string}` }
+    prefix?: string
   },
 ) => {
-  const server = fastify();
+  const server = fastify()
 
   const openApiFastifyPluginOptions: any = {
     router: handler.router,
@@ -36,30 +36,30 @@ const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
     onError: handler.onError ?? onErrorMock,
     maxBodySize: handler.maxBodySize,
     basePath: opts?.serverOpts?.basePath,
-  };
+  }
 
   await server.register(
     async (server) => {
-      await server.register(fastifyTRPCOpenApiPlugin, openApiFastifyPluginOptions);
+      await server.register(fastifyTRPCOpenApiPlugin, openApiFastifyPluginOptions)
     },
     { prefix: opts?.prefix ?? '' },
-  );
+  )
 
-  const port = 0;
-  const url = await server.listen({ port });
+  const port = 0
+  const url = await server.listen({ port })
 
   return {
     url,
     close: () => server.close(),
-  };
-};
+  }
+}
 
-const t = initTRPC.meta<OpenApiMeta>().context<any>().create();
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
 
 describe('fastify adapter', () => {
   afterEach(() => {
-    clearMocks();
-  });
+    clearMocks()
+  })
 
   test('with valid routes', async () => {
     const appRouter = t.router({
@@ -78,51 +78,51 @@ describe('fastify adapter', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-    });
+    })
 
-    const { url, close } = await createFastifyServerWithRouter({ router: appRouter });
+    const { url, close } = await createFastifyServerWithRouter({ router: appRouter })
 
     {
-      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
       const res = await fetch(`${url}/say-hello`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'James' }),
-      });
-      const body = await res.json();
+      })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/say/hello?name=James`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/say/hello?name=James`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    await close();
-  });
+    await close()
+  })
 
   test('with basePath', async () => {
     const appRouter = t.router({
@@ -131,26 +131,26 @@ describe('fastify adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
         .query(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = await createFastifyServerWithRouter(
       { router: appRouter },
       { serverOpts: { basePath: '/open-api' } },
-    );
+    )
 
-    const res = await fetch(`${url}/open-api/echo?payload=vercjames`, { method: 'GET' });
-    const body = await res.json();
+    const res = await fetch(`${url}/open-api/echo?payload=vercjames`, { method: 'GET' })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(200)
     expect(body).toEqual({
       payload: 'vercjames',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    await close();
-  });
+    await close()
+  })
 
   test('with prefix', async () => {
     const appRouter = t.router({
@@ -159,28 +159,28 @@ describe('fastify adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
         .query(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = await createFastifyServerWithRouter(
       { router: appRouter },
       {
         prefix: '/api-prefix',
       },
-    );
+    )
 
     const res = await fetch(`${url}/api-prefix/echo?payload=vercjames`, {
       method: 'GET',
-    });
-    const body = await res.json();
+    })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(200)
     expect(body).toEqual({
       payload: 'vercjames',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    await close();
-  });
-});
+    await close()
+  })
+})

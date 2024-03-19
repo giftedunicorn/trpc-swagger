@@ -1,22 +1,22 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-floating-promises, @typescript-eslint/ban-ts-comment */
-import { TRPCError, initTRPC } from '@trpc/server';
-import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify';
-import { type FastifyReply, type FastifyRequest } from 'fastify';
-import jwt from 'jsonwebtoken';
-import { OpenApiMeta } from 'trpc-swagger';
-import { v4 as uuid } from 'uuid';
-import { z } from 'zod';
+import { TRPCError, initTRPC } from '@trpc/server'
+import { CreateFastifyContextOptions } from '@trpc/server/adapters/fastify'
+import { type FastifyReply, type FastifyRequest } from 'fastify'
+import jwt from 'jsonwebtoken'
+import { OpenApiMeta } from 'trpc-swagger'
+import { v4 as uuid } from 'uuid'
+import { z } from 'zod'
 
-import { Post, User, database } from './database';
+import { Post, User, database } from './database'
 
-const jwtSecret = uuid();
+const jwtSecret = uuid()
 
 export type Context = {
-  user: User | null;
-  requestId: string;
-  req: FastifyRequest;
-  res: FastifyReply;
-};
+  user: User | null
+  requestId: string
+  req: FastifyRequest
+  res: FastifyReply
+}
 
 const t = initTRPC
   .context<Context>()
@@ -24,47 +24,47 @@ const t = initTRPC
   .create({
     errorFormatter: ({ error, shape }) => {
       if (error.code === 'INTERNAL_SERVER_ERROR' && process.env.NODE_ENV === 'production') {
-        return { ...shape, message: 'Internal server error' };
+        return { ...shape, message: 'Internal server error' }
       }
-      return shape;
+      return shape
     },
-  });
+  })
 
 export const createContext = async ({
   req,
   res,
 }: // eslint-disable-next-line @typescript-eslint/require-await
 CreateFastifyContextOptions): Promise<Context> => {
-  const requestId = uuid();
-  res.header('x-request-id', requestId);
+  const requestId = uuid()
+  res.header('x-request-id', requestId)
 
-  let user: User | null = null;
+  let user: User | null = null
 
   try {
     if (req.headers.authorization) {
-      const token = req.headers.authorization.split(' ')[1];
-      const userId = jwt.verify(token, jwtSecret) as string;
+      const token = req.headers.authorization.split(' ')[1]
+      const userId = jwt.verify(token, jwtSecret) as string
       if (userId) {
-        user = database.users.find((_user) => _user.id === userId) ?? null;
+        user = database.users.find((_user) => _user.id === userId) ?? null
       }
     }
   } catch (cause) {
-    console.error(cause);
+    console.error(cause)
   }
 
-  return { req, res, user, requestId };
-};
+  return { req, res, user, requestId }
+}
 
-const publicProcedure = t.procedure;
+const publicProcedure = t.procedure
 const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   if (!ctx.user) {
     throw new TRPCError({
       message: 'User not found',
       code: 'UNAUTHORIZED',
-    });
+    })
   }
-  return next({ ctx: { ...ctx, user: ctx.user } });
-});
+  return next({ ctx: { ...ctx, user: ctx.user } })
+})
 
 const authRouter = t.router({
   register: publicProcedure
@@ -93,13 +93,13 @@ const authRouter = t.router({
       }),
     )
     .mutation(({ input }) => {
-      let user = database.users.find((_user) => _user.email === input.email);
+      let user = database.users.find((_user) => _user.email === input.email)
 
       if (user) {
         throw new TRPCError({
           message: 'User with email already exists',
           code: 'UNAUTHORIZED',
-        });
+        })
       }
 
       user = {
@@ -107,11 +107,11 @@ const authRouter = t.router({
         email: input.email,
         passcode: input.passcode,
         name: input.name,
-      };
+      }
 
-      database.users.push(user);
+      database.users.push(user)
 
-      return { user: { id: user.id, email: user.email, name: user.name } };
+      return { user: { id: user.id, email: user.email, name: user.name } }
     }),
   login: publicProcedure
     .meta({
@@ -134,26 +134,26 @@ const authRouter = t.router({
       }),
     )
     .mutation(({ input }) => {
-      const user = database.users.find((_user) => _user.email === input.email);
+      const user = database.users.find((_user) => _user.email === input.email)
 
       if (!user) {
         throw new TRPCError({
           message: 'User with email not found',
           code: 'UNAUTHORIZED',
-        });
+        })
       }
       if (user.passcode !== input.passcode) {
         throw new TRPCError({
           message: 'Passcode was incorrect',
           code: 'UNAUTHORIZED',
-        });
+        })
       }
 
       return {
         token: jwt.sign(user.id, jwtSecret),
-      };
+      }
     }),
-});
+})
 
 const usersRouter = t.router({
   getUsers: publicProcedure
@@ -182,9 +182,9 @@ const usersRouter = t.router({
         id: user.id,
         email: user.email,
         name: user.name,
-      }));
+      }))
 
-      return { users };
+      return { users }
     }),
   getUserById: publicProcedure
     .meta({
@@ -210,18 +210,18 @@ const usersRouter = t.router({
       }),
     )
     .query(({ input }) => {
-      const user = database.users.find((_user) => _user.id === input.id);
+      const user = database.users.find((_user) => _user.id === input.id)
 
       if (!user) {
         throw new TRPCError({
           message: 'User not found',
           code: 'NOT_FOUND',
-        });
+        })
       }
 
-      return { user };
+      return { user }
     }),
-});
+})
 
 const postsRouter = t.router({
   getPosts: publicProcedure
@@ -250,15 +250,15 @@ const postsRouter = t.router({
       }),
     )
     .query(({ input }) => {
-      let posts: Post[] = database.posts;
+      let posts: Post[] = database.posts
 
       if (input.userId) {
         posts = posts.filter((post) => {
-          return post.userId === input.userId;
-        });
+          return post.userId === input.userId
+        })
       }
 
-      return { posts };
+      return { posts }
     }),
   getPostById: publicProcedure
     .meta({
@@ -284,16 +284,16 @@ const postsRouter = t.router({
       }),
     )
     .query(({ input }) => {
-      const post = database.posts.find((_post) => _post.id === input.id);
+      const post = database.posts.find((_post) => _post.id === input.id)
 
       if (!post) {
         throw new TRPCError({
           message: 'Post not found',
           code: 'NOT_FOUND',
-        });
+        })
       }
 
-      return { post };
+      return { post }
     }),
   createPost: protectedProcedure
     .meta({
@@ -324,11 +324,11 @@ const postsRouter = t.router({
         id: uuid(),
         content: input.content,
         userId: ctx.user.id,
-      };
+      }
 
-      database.posts.push(post);
+      database.posts.push(post)
 
-      return { post };
+      return { post }
     }),
   updatePostById: protectedProcedure
     .meta({
@@ -356,24 +356,24 @@ const postsRouter = t.router({
       }),
     )
     .mutation(({ input, ctx }) => {
-      const post = database.posts.find((_post) => _post.id === input.id);
+      const post = database.posts.find((_post) => _post.id === input.id)
 
       if (!post) {
         throw new TRPCError({
           message: 'Post not found',
           code: 'NOT_FOUND',
-        });
+        })
       }
       if (post.userId !== ctx.user.id) {
         throw new TRPCError({
           message: 'Cannot edit post owned by other user',
           code: 'FORBIDDEN',
-        });
+        })
       }
 
-      post.content = input.content;
+      post.content = input.content
 
-      return { post };
+      return { post }
     }),
   deletePostById: protectedProcedure
     .meta({
@@ -392,31 +392,31 @@ const postsRouter = t.router({
     )
     .output(z.null())
     .mutation(({ input, ctx }) => {
-      const post = database.posts.find((_post) => _post.id === input.id);
+      const post = database.posts.find((_post) => _post.id === input.id)
 
       if (!post) {
         throw new TRPCError({
           message: 'Post not found',
           code: 'NOT_FOUND',
-        });
+        })
       }
       if (post.userId !== ctx.user.id) {
         throw new TRPCError({
           message: 'Cannot delete post owned by other user',
           code: 'FORBIDDEN',
-        });
+        })
       }
 
-      database.posts = database.posts.filter((_post) => _post !== post);
+      database.posts = database.posts.filter((_post) => _post !== post)
 
-      return null;
+      return null
     }),
-});
+})
 
 export const appRouter = t.router({
   auth: authRouter,
   users: usersRouter,
   posts: postsRouter,
-});
+})
 
-export type AppRouter = typeof appRouter;
+export type AppRouter = typeof appRouter

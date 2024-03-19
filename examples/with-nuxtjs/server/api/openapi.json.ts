@@ -1,5 +1,5 @@
-import { openApiDocument } from '../openapi';
+import { openApiDocument } from '../openapi'
 
 export default defineEventHandler(() => {
-  return openApiDocument;
-});
+  return openApiDocument
+})

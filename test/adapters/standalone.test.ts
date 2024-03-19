@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { createTRPCProxyClient, httpBatchLink } from '@trpc/client';
-import { TRPCError, initTRPC } from '@trpc/server';
-import { createHTTPHandler } from '@trpc/server/adapters/standalone';
-import { Server } from 'http';
-import fetch from 'node-fetch';
-import superjson from 'superjson';
-import { z } from 'zod';
+import { createTRPCProxyClient, httpBatchLink } from '@trpc/client'
+import { TRPCError, initTRPC } from '@trpc/server'
+import { createHTTPHandler } from '@trpc/server/adapters/standalone'
+import { Server } from 'http'
+import fetch from 'node-fetch'
+import superjson from 'superjson'
+import { z } from 'zod'
 
 import {
   CreateOpenApiHttpHandlerOptions,
@@ -13,21 +13,21 @@ import {
   OpenApiMeta,
   OpenApiRouter,
   createOpenApiHttpHandler,
-} from '../../src';
-import * as zodUtils from '../../src/utils/zod';
+} from '../../src'
+import * as zodUtils from '../../src/utils/zod'
 
 // @ts-expect-error - global fetch
-global.fetch = fetch;
+global.fetch = fetch
 
-const createContextMock = jest.fn();
-const responseMetaMock = jest.fn();
-const onErrorMock = jest.fn();
+const createContextMock = jest.fn()
+const responseMetaMock = jest.fn()
+const onErrorMock = jest.fn()
 
 const clearMocks = () => {
-  createContextMock.mockClear();
-  responseMetaMock.mockClear();
-  onErrorMock.mockClear();
-};
+  createContextMock.mockClear()
+  responseMetaMock.mockClear()
+  onErrorMock.mockClear()
+}
 
 const createHttpServerWithRouter = <TRouter extends OpenApiRouter>(
   handlerOpts: CreateOpenApiHttpHandlerOptions<TRouter>,
@@ -38,40 +38,40 @@ const createHttpServerWithRouter = <TRouter extends OpenApiRouter>(
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
     maxBodySize: handlerOpts.maxBodySize,
-  } as any);
+  } as any)
   const httpHandler = createHTTPHandler<TRouter>({
     router: handlerOpts.router,
     createContext: handlerOpts.createContext ?? createContextMock,
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
     maxBodySize: handlerOpts.maxBodySize,
-  } as any);
+  } as any)
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
   const server = new Server((req, res) => {
     if (req.url!.startsWith('/trpc')) {
-      req.url = req.url!.replace('/trpc', '');
-      return httpHandler(req, res);
+      req.url = req.url!.replace('/trpc', '')
+      return httpHandler(req, res)
     }
-    return openApiHttpHandler(req, res);
-  });
+    return openApiHttpHandler(req, res)
+  })
 
-  server.listen(0);
-  const port = (server.address() as any).port as number;
-  const url = `http://localhost:${port}`;
+  server.listen(0)
+  const port = (server.address() as any).port as number
+  const url = `http://localhost:${port}`
 
   return {
     url,
     close: () => server.close(),
-  };
-};
+  }
+}
 
-const t = initTRPC.meta<OpenApiMeta>().context<any>().create();
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
 
 describe('standalone adapter', () => {
   afterEach(() => {
-    clearMocks();
-  });
+    clearMocks()
+  })
 
   // Please note: validating router does not happen in `production`.
   test('with invalid router', () => {
@@ -80,14 +80,14 @@ describe('standalone adapter', () => {
         .meta({ openapi: { method: 'GET', path: '/invalid-route' } })
         .input(z.void())
         .query(({ input }) => input),
-    });
+    })
 
     expect(() => {
       createOpenApiHttpHandler({
         router: appRouter,
-      });
-    }).toThrowError('[query.invalidRoute] - Output parser expects a Zod validator');
-  });
+      })
+    }).toThrowError('[query.invalidRoute] - Output parser expects a Zod validator')
+  })
 
   test('with not found path', async () => {
     const appRouter = t.router({
@@ -96,23 +96,23 @@ describe('standalone adapter', () => {
         .input(z.void())
         .output(z.literal('pong'))
         .mutation(() => 'pong' as const),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/pingg`, { method: 'POST' });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    const res = await fetch(`${url}/pingg`, { method: 'POST' })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(404);
-    expect(body).toEqual({ message: 'Not found', code: 'NOT_FOUND' });
-    expect(createContextMock).toHaveBeenCalledTimes(0);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(404)
+    expect(body).toEqual({ message: 'Not found', code: 'NOT_FOUND' })
+    expect(createContextMock).toHaveBeenCalledTimes(0)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with not found method', async () => {
     const appRouter = t.router({
@@ -121,23 +121,23 @@ describe('standalone adapter', () => {
         .input(z.void())
         .output(z.literal('pong'))
         .mutation(() => 'pong' as const),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/ping`, { method: 'PATCH' });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    const res = await fetch(`${url}/ping`, { method: 'PATCH' })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(404);
-    expect(body).toEqual({ message: 'Not found', code: 'NOT_FOUND' });
-    expect(createContextMock).toHaveBeenCalledTimes(0);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    expect(res.status).toBe(404)
+    expect(body).toEqual({ message: 'Not found', code: 'NOT_FOUND' })
+    expect(createContextMock).toHaveBeenCalledTimes(0)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with missing content-type header', async () => {
     const appRouter = t.router({
@@ -146,19 +146,19 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       body: JSON.stringify('James'),
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(400)
     expect(body).toEqual({
       message: 'Input validation failed',
       code: 'BAD_REQUEST',
@@ -171,13 +171,13 @@ describe('standalone adapter', () => {
           received: 'undefined',
         },
       ],
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with invalid content-type', async () => {
     const appRouter = t.router({
@@ -186,20 +186,20 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
       body: 'non-json-string',
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(400)
     expect(body).toEqual({
       message: 'Input validation failed',
       code: 'BAD_REQUEST',
@@ -212,13 +212,13 @@ describe('standalone adapter', () => {
           received: 'undefined',
         },
       ],
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with missing input', async () => {
     const appRouter = t.router({
@@ -227,16 +227,16 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .query(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/echo`, { method: 'GET' });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    const res = await fetch(`${url}/echo`, { method: 'GET' })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(400)
     expect(body).toEqual({
       message: 'Input validation failed',
       code: 'BAD_REQUEST',
@@ -249,13 +249,13 @@ describe('standalone adapter', () => {
           received: 'undefined',
         },
       ],
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with wrong input type', async () => {
     const appRouter = t.router({
@@ -264,20 +264,20 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: 123 }),
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(400)
     expect(body).toEqual({
       message: 'Input validation failed',
       code: 'BAD_REQUEST',
@@ -290,13 +290,13 @@ describe('standalone adapter', () => {
           received: 'number',
         },
       ],
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with bad output', async () => {
     const appRouter = t.router({
@@ -306,30 +306,30 @@ describe('standalone adapter', () => {
         .output(z.object({ payload: z.string() }))
         // @ts-expect-error - fail on purpose
         .mutation(() => 'fail'),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: '@vercjames' }),
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(500)
     expect(body).toEqual({
       message: 'Output validation failed',
       code: 'INTERNAL_SERVER_ERROR',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with valid routes', async () => {
     const appRouter = t.router({
@@ -343,41 +343,41 @@ describe('standalone adapter', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
       const res = await fetch(`${url}/say-hello`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'James' }),
-      });
-      const body = await res.json();
+      })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with void input', async () => {
     const appRouter = t.router({
@@ -391,37 +391,37 @@ describe('standalone adapter', () => {
         .input(z.void())
         .output(z.literal('pong'))
         .mutation(() => 'pong' as const),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/ping`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/ping`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual('pong');
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual('pong')
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/ping`, { method: 'POST' });
-      const body = await res.json();
+      const res = await fetch(`${url}/ping`, { method: 'POST' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual('pong');
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual('pong')
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with void output', async () => {
     const appRouter = t.router({
@@ -430,33 +430,33 @@ describe('standalone adapter', () => {
         .input(z.object({ ping: z.string() }))
         .output(z.void())
         .query(() => undefined),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/ping?ping=ping`, { method: 'GET' });
-    let body;
+    const res = await fetch(`${url}/ping?ping=ping`, { method: 'GET' })
+    let body
     try {
-      body = await res.json();
+      body = await res.json()
     } catch (e) {
       // do nothing
     }
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual(undefined);
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(200)
+    expect(body).toEqual(undefined)
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with createContext', async () => {
-    type Context = { id: 1234567890 };
+    type Context = { id: 1234567890 }
 
-    const t2 = initTRPC.meta<OpenApiMeta>().context<Context>().create();
+    const t2 = initTRPC.meta<OpenApiMeta>().context<Context>().create()
 
     const appRouter = t2.router({
       echo: t2.procedure
@@ -464,26 +464,26 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.object({ id: z.number() }) }))
         .query(({ input, ctx }) => ({ payload: input.payload, context: ctx })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       createContext: (): Context => ({ id: 1234567890 }),
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/echo?payload=vercjames`, { method: 'GET' });
-    const body = await res.json();
+    const res = await fetch(`${url}/echo?payload=vercjames`, { method: 'GET' })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(200)
     expect(body).toEqual({
       payload: 'vercjames',
       context: { id: 1234567890 },
-    });
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    })
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with responseMeta', async () => {
     const appRouter = t.router({
@@ -492,32 +492,32 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
         .query(({ input, ctx }) => ({ payload: input.payload, context: ctx })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
       responseMeta: () => ({ status: 202, headers: { 'x-custom': 'custom header' } }),
-    });
+    })
 
-    const res = await fetch(`${url}/echo?payload=vercjames`, { method: 'GET' });
-    const body = await res.json();
+    const res = await fetch(`${url}/echo?payload=vercjames`, { method: 'GET' })
+    const body = await res.json()
 
-    expect(res.status).toBe(202);
-    expect(res.headers.get('x-custom')).toBe('custom header');
+    expect(res.status).toBe(202)
+    expect(res.headers.get('x-custom')).toBe('custom header')
     expect(body).toEqual({
       payload: 'vercjames',
       context: undefined,
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with skipped transformer', async () => {
     const t2 = initTRPC.meta<OpenApiMeta>().context<any>().create({
       transformer: superjson,
-    });
+    })
 
     const appRouter = t2.router({
       echo: t2.procedure
@@ -525,42 +525,42 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
         .query(({ input, ctx }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/echo?payload=vercjames`, { method: 'GET' });
-    const body = await res.json();
+    const res = await fetch(`${url}/echo?payload=vercjames`, { method: 'GET' })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(200)
     expect(body).toEqual({
       payload: 'vercjames',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with warmup request', async () => {
-    const appRouter = t.router({});
+    const appRouter = t.router({})
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/any-endpoint`, { method: 'HEAD' });
+    const res = await fetch(`${url}/any-endpoint`, { method: 'HEAD' })
 
-    expect(res.status).toBe(204);
-    expect(createContextMock).toHaveBeenCalledTimes(0);
-    expect(responseMetaMock).toHaveBeenCalledTimes(0);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(204)
+    expect(createContextMock).toHaveBeenCalledTimes(0)
+    expect(responseMetaMock).toHaveBeenCalledTimes(0)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with invalid json', async () => {
     const appRouter = t.router({
@@ -569,31 +569,31 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       // @ts-expect-error - not JSON.stringified
       body: { payload: 'James' },
-    });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(400)
     expect(body).toEqual({
       message: 'Failed to parse request body',
       code: 'PARSE_ERROR',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(0);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(0)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with maxBodySize', async () => {
     const appRouter = t.router({
@@ -602,53 +602,53 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
-    const requestBody = JSON.stringify({ payload: 'James' });
+    const requestBody = JSON.stringify({ payload: 'James' })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
       maxBodySize: requestBody.length,
-    });
+    })
 
     {
       const res = await fetch(`${url}/echo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: requestBody,
-      });
-      const body = await res.json();
+      })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(200)
       expect(body).toEqual({
         payload: 'James',
-      });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
       const res = await fetch(`${url}/echo`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ payload: 'James!' }),
-      });
-      const body = (await res.json()) as OpenApiErrorResponse;
+      })
+      const body = (await res.json()) as OpenApiErrorResponse
 
-      expect(res.status).toBe(413);
+      expect(res.status).toBe(413)
       expect(body).toEqual({
         message: 'Request body too large',
         code: 'PAYLOAD_TOO_LARGE',
-      });
-      expect(createContextMock).toHaveBeenCalledTimes(0);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(1);
+      })
+      expect(createContextMock).toHaveBeenCalledTimes(0)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(1)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with multiple input query string params', async () => {
     const appRouter = t.router({
@@ -657,25 +657,25 @@ describe('standalone adapter', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/say-hello?name=James&name=vercjames`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/say-hello?name=James&name=vercjames`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with case insensitivity', async () => {
     const appRouter = t.router({
@@ -689,37 +689,37 @@ describe('standalone adapter', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/LOWER?name=James`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/LOWER?name=James`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/upper?name=James`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/upper?name=James`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with path parameters', async () => {
     const appRouter = t.router({
@@ -746,55 +746,55 @@ describe('standalone adapter', () => {
         .query(({ input }) => ({
           greeting: `${input.greeting} ${input.first} ${input.last}!`,
         })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/say-hello/James`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/say-hello/James`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
       const res = await fetch(`${url}/say-hello/James`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: 'vercjames' }),
-      });
-      const body = await res.json();
+      })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello James!' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/say-hello/James/Berry?greeting=Hello&first=vercjames`, {
+      const res = await fetch(`${url}/say-hello/verc/james?greeting=Hello&first=vercjames`, {
         method: 'GET',
-      });
-      const body = await res.json();
+      })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ greeting: 'Hello Verc James' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ greeting: 'Hello Verc James' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with bad output', async () => {
     const appRouter = t.router({
@@ -804,26 +804,26 @@ describe('standalone adapter', () => {
         .output(z.string())
         // @ts-expect-error - intentional bad output
         .query(() => ({})),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/bad-output`, { method: 'GET' });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    const res = await fetch(`${url}/bad-output`, { method: 'GET' })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(500)
     expect(body).toEqual({
       message: 'Output validation failed',
       code: 'INTERNAL_SERVER_ERROR',
-    });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with void and trpc client', async () => {
     // ensure monkey patch doesnt break router
@@ -838,30 +838,30 @@ describe('standalone adapter', () => {
         .input(z.void())
         .output(z.object({ payload: z.any() }))
         .mutation(({ input }) => ({ payload: input })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    type AppRouter = typeof appRouter;
+    type AppRouter = typeof appRouter
     const client = createTRPCProxyClient<AppRouter>({
       links: [httpBatchLink({ url: `${url}/trpc` })],
-    });
+    })
 
     {
-      const res = await client.withVoidQuery.query();
+      const res = await client.withVoidQuery.query()
 
-      expect(res).toEqual({});
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res).toEqual({})
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
 
       await expect(() => {
         // @ts-expect-error - send monkey patched input type
-        return client.withVoidQuery.query({});
+        return client.withVoidQuery.query({})
       }).rejects.toThrowErrorMatchingInlineSnapshot(`
       "[
         {
@@ -872,26 +872,26 @@ describe('standalone adapter', () => {
           \\"message\\": \\"Expected void, received object\\"
         }
       ]"
-      `);
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(1);
+      `)
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await client.withVoidMutation.mutate();
+      const res = await client.withVoidMutation.mutate()
 
-      expect(res).toEqual({});
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res).toEqual({})
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
 
       await expect(() => {
         // @ts-expect-error - send monkey patched input type
-        return client.withVoidMutation.mutate({});
+        return client.withVoidMutation.mutate({})
       }).rejects.toThrowErrorMatchingInlineSnapshot(`
         "[
           {
@@ -902,14 +902,14 @@ describe('standalone adapter', () => {
             \\"message\\": \\"Expected void, received object\\"
           }
         ]"
-      `);
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(1);
+      `)
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(1)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with DELETE mutation', async () => {
     const appRouter = t.router({
@@ -918,23 +918,23 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => input),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/echo-delete?payload=vercjames`, { method: 'DELETE' });
-    const body = await res.json();
+    const res = await fetch(`${url}/echo-delete?payload=vercjames`, { method: 'DELETE' })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ payload: 'vercjames' });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(200)
+    expect(body).toEqual({ payload: 'vercjames' })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with POST query', async () => {
     const appRouter = t.router({
@@ -943,27 +943,27 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .query(({ input }) => input),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo-post`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ payload: 'vercjames' }),
-    });
-    const body = await res.json();
+    })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ payload: 'vercjames' });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(200)
+    expect(body).toEqual({ payload: 'vercjames' })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with thrown error', async () => {
     const appRouter = t.router({
@@ -972,7 +972,7 @@ describe('standalone adapter', () => {
         .input(z.void())
         .output(z.void())
         .mutation(() => {
-          throw new Error('Custom error message');
+          throw new Error('Custom error message')
         }),
       customTRPCError: t.procedure
         .meta({ openapi: { method: 'POST', path: '/custom-trpc-error' } })
@@ -982,61 +982,61 @@ describe('standalone adapter', () => {
           throw new TRPCError({
             message: 'Custom TRPCError message',
             code: 'CLIENT_CLOSED_REQUEST',
-          });
+          })
         }),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/custom-error`, { method: 'POST' });
-      const body = (await res.json()) as OpenApiErrorResponse;
+      const res = await fetch(`${url}/custom-error`, { method: 'POST' })
+      const body = (await res.json()) as OpenApiErrorResponse
 
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(500)
       expect(body).toEqual({
         message: 'Custom error message',
         code: 'INTERNAL_SERVER_ERROR',
-      });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(1);
+      })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/custom-trpc-error`, { method: 'POST' });
-      const body = (await res.json()) as OpenApiErrorResponse;
+      const res = await fetch(`${url}/custom-trpc-error`, { method: 'POST' })
+      const body = (await res.json()) as OpenApiErrorResponse
 
-      expect(res.status).toBe(499);
+      expect(res.status).toBe(499)
       expect(body).toEqual({
         message: 'Custom TRPCError message',
         code: 'CLIENT_CLOSED_REQUEST',
-      });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(1);
+      })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(1)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with error formatter', async () => {
-    const errorFormatterMock = jest.fn();
+    const errorFormatterMock = jest.fn()
 
     const t2 = initTRPC
       .meta<OpenApiMeta>()
       .context<any>()
       .create({
         errorFormatter: ({ error, shape }) => {
-          errorFormatterMock();
+          errorFormatterMock()
           if (error.code === 'INTERNAL_SERVER_ERROR') {
-            return { ...shape, message: 'Custom formatted error message' };
+            return { ...shape, message: 'Custom formatted error message' }
           }
-          return shape;
+          return shape
         },
-      });
+      })
 
     const appRouter = t2.router({
       customFormattedError: t2.procedure
@@ -1044,29 +1044,29 @@ describe('standalone adapter', () => {
         .input(z.void())
         .output(z.void())
         .mutation(() => {
-          throw new Error('Custom error message');
+          throw new Error('Custom error message')
         }),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/custom-formatted-error`, { method: 'POST' });
-    const body = (await res.json()) as OpenApiErrorResponse;
+    const res = await fetch(`${url}/custom-formatted-error`, { method: 'POST' })
+    const body = (await res.json()) as OpenApiErrorResponse
 
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(500)
     expect(body).toEqual({
       message: 'Custom formatted error message',
       code: 'INTERNAL_SERVER_ERROR',
-    });
-    expect(errorFormatterMock).toHaveBeenCalledTimes(1);
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(1);
+    })
+    expect(errorFormatterMock).toHaveBeenCalledTimes(1)
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(1)
 
-    close();
-  });
+    close()
+  })
 
   test('with nested routers', async () => {
     const appRouter = t.router({
@@ -1089,49 +1089,49 @@ describe('standalone adapter', () => {
             .query(({ input }) => ({ payload: input.payload })),
         }),
       }),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/procedure?payload=one`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/procedure?payload=one`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ payload: 'one' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ payload: 'one' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/router/procedure?payload=two`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/router/procedure?payload=two`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ payload: 'two' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ payload: 'two' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const res = await fetch(`${url}/router/router/procedure?payload=three`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/router/router/procedure?payload=three`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ payload: 'three' });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ payload: 'three' })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with multiple inputs', async () => {
     const appRouter = t.router({
@@ -1141,23 +1141,23 @@ describe('standalone adapter', () => {
         .input(z.object({ lastName: z.string() }))
         .output(z.object({ fullName: z.string() }))
         .query(({ input }) => ({ fullName: `${input.firstName} ${input.lastName}` })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/multi-input?firstName=James&lastName=Berry`, { method: 'GET' });
-    const body = await res.json();
+    const res = await fetch(`${url}/multi-input?firstName=Verc&lastName=James`, { method: 'GET' })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ fullName: 'Verc James' });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(200)
+    expect(body).toEqual({ fullName: 'Verc James' })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with preprocess', async () => {
     const appRouter = t.router({
@@ -1170,30 +1170,30 @@ describe('standalone adapter', () => {
         )
         .output(z.object({ result: z.string() }))
         .query(({ input }) => ({ result: input.value.join('XXX') })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
-    const res = await fetch(`${url}/preprocess?value=lol`, { method: 'GET' });
-    const body = await res.json();
+    const res = await fetch(`${url}/preprocess?value=lol`, { method: 'GET' })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ result: 'lolXXXlol' });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(200)
+    expect(body).toEqual({ result: 'lolXXXlol' })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
+    close()
+  })
 
   test('with non-coerce preprocess', async () => {
     // only applies when zod does not support (below version v3.20.0)
 
     // @ts-expect-error - hack to disable zodSupportsCoerce
     // eslint-disable-next-line import/namespace
-    zodUtils.zodSupportsCoerce = false;
+    zodUtils.zodSupportsCoerce = false
     {
       const appRouter = t.router({
         plusOne: t.procedure
@@ -1208,27 +1208,27 @@ describe('standalone adapter', () => {
           )
           .output(z.object({ result: z.number() }))
           .query(({ input }) => ({ result: input.number + 1 })),
-      });
+      })
 
       const { url, close } = createHttpServerWithRouter({
         router: appRouter,
-      });
+      })
 
-      const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ result: 10 });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ result: 10 })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      close();
+      close()
     }
     // @ts-expect-error - hack to re-enable zodSupportsCoerce
     // eslint-disable-next-line import/namespace
-    zodUtils.zodSupportsCoerce = true;
-  });
+    zodUtils.zodSupportsCoerce = true
+  })
 
   test('with coerce', async () => {
     const appRouter = t.router({
@@ -1247,56 +1247,56 @@ describe('standalone adapter', () => {
         .input(z.object({ number: z.number() }))
         .output(z.object({ result: z.number() }))
         .query(({ input }) => ({ result: input.number + 1 })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     {
-      const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/plus-one?number=9`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ result: 10 });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ result: 10 })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
     {
-      const date = new Date();
+      const date = new Date()
 
       const res = await fetch(`${url}/plus-one`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ date }),
-      });
-      const body = await res.json();
+      })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ result: date.getTime() + 1 });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ result: date.getTime() + 1 })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-      clearMocks();
+      clearMocks()
     }
 
     {
-      const res = await fetch(`${url}/plus-one/9`, { method: 'GET' });
-      const body = await res.json();
+      const res = await fetch(`${url}/plus-one/9`, { method: 'GET' })
+      const body = await res.json()
 
-      expect(res.status).toBe(200);
-      expect(body).toEqual({ result: 10 });
-      expect(createContextMock).toHaveBeenCalledTimes(1);
-      expect(responseMetaMock).toHaveBeenCalledTimes(1);
-      expect(onErrorMock).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(200)
+      expect(body).toEqual({ result: 10 })
+      expect(createContextMock).toHaveBeenCalledTimes(1)
+      expect(responseMetaMock).toHaveBeenCalledTimes(1)
+      expect(onErrorMock).toHaveBeenCalledTimes(0)
     }
 
-    close();
-  });
+    close()
+  })
 
   test('with x-www-form-urlencoded', async () => {
     const appRouter = t.router({
@@ -1311,25 +1311,25 @@ describe('standalone adapter', () => {
         .input(z.object({ payload: z.array(z.string()) }))
         .output(z.object({ result: z.string() }))
         .query(({ input }) => ({ result: input.payload.join(' ') })),
-    });
+    })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
-    });
+    })
 
     const res = await fetch(`${url}/echo`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: 'payload=Hello&payload=World',
-    });
-    const body = await res.json();
+    })
+    const body = await res.json()
 
-    expect(res.status).toBe(200);
-    expect(body).toEqual({ result: 'Hello World' });
-    expect(createContextMock).toHaveBeenCalledTimes(1);
-    expect(responseMetaMock).toHaveBeenCalledTimes(1);
-    expect(onErrorMock).toHaveBeenCalledTimes(0);
+    expect(res.status).toBe(200)
+    expect(body).toEqual({ result: 'Hello World' })
+    expect(createContextMock).toHaveBeenCalledTimes(1)
+    expect(responseMetaMock).toHaveBeenCalledTimes(1)
+    expect(onErrorMock).toHaveBeenCalledTimes(0)
 
-    close();
-  });
-});
+    close()
+  })
+})

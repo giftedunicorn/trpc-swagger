@@ -1,6 +1,6 @@
-import { generateOpenApiDocument } from 'trpc-swagger';
+import { generateOpenApiDocument } from 'trpc-swagger'
 
-import { appRouter } from './router';
+import { appRouter } from './router'
 
 // Generate OpenAPI schema document
 export const openApiDocument = generateOpenApiDocument(appRouter, {
@@ -10,4 +10,4 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
   baseUrl: 'http://localhost:3000/api',
   docsUrl: 'https://github.com/vercjames/trpc-swagger',
   tags: ['auth', 'users', 'posts'],
-});
+})

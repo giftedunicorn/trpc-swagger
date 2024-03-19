@@ -1,20 +1,20 @@
-import { OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3 } from 'openapi-types'
 
-import { OpenApiRouter } from '../types';
-import { getOpenApiPathsObject } from './paths';
-import { errorResponseObject } from './schema';
+import { OpenApiRouter } from '../types'
+import { getOpenApiPathsObject } from './paths'
+import { errorResponseObject } from './schema'
 
-export const openApiVersion = '3.0.3';
+export const openApiVersion = '3.0.3'
 
 export type GenerateOpenApiDocumentOptions = {
-  title: string;
-  description?: string;
-  version: string;
-  baseUrl: string;
-  docsUrl?: string;
-  tags?: string[];
-  securitySchemes?: OpenAPIV3.ComponentsObject['securitySchemes'];
-};
+  title: string
+  description?: string
+  version: string
+  baseUrl: string
+  docsUrl?: string
+  tags?: string[]
+  securitySchemes?: OpenAPIV3.ComponentsObject['securitySchemes']
+}
 
 export const generateOpenApiDocument = (
   appRouter: OpenApiRouter,
@@ -25,7 +25,7 @@ export const generateOpenApiDocument = (
       type: 'http',
       scheme: 'bearer',
     },
-  };
+  }
   return {
     openapi: openApiVersion,
     info: {
@@ -47,5 +47,5 @@ export const generateOpenApiDocument = (
     },
     tags: opts.tags?.map((tag) => ({ name: tag })),
     externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
-  };
-};
+  }
+}

@@ -3,7 +3,7 @@ import type {
   APIGatewayProxyEventPathParameters,
   APIGatewayProxyEventV2,
   Context,
-} from 'aws-lambda';
+} from 'aws-lambda'
 
 export const mockAPIGatewayProxyEventV1 = ({
   body,
@@ -14,13 +14,13 @@ export const mockAPIGatewayProxyEventV1 = ({
   resource,
   pathParameters,
 }: {
-  body: string;
-  headers: { [key: string]: string };
-  queryStringParameters: Record<string, string>;
-  path: string;
-  method: string;
-  resource: string;
-  pathParameters?: APIGatewayProxyEventPathParameters;
+  body: string
+  headers: { [key: string]: string }
+  queryStringParameters: Record<string, string>
+  path: string
+  method: string
+  resource: string
+  pathParameters?: APIGatewayProxyEventPathParameters
 }): APIGatewayProxyEvent => {
   return {
     body,
@@ -64,8 +64,8 @@ export const mockAPIGatewayProxyEventV1 = ({
       },
       authorizer: {},
     },
-  };
-};
+  }
+}
 
 export const mockAPIGatewayProxyEventV2 = ({
   body,
@@ -76,13 +76,13 @@ export const mockAPIGatewayProxyEventV2 = ({
   routeKey,
   pathParameters,
 }: {
-  body: string;
-  headers: { [key: string]: string };
-  queryStringParameters: Record<string, string>;
-  path: string;
-  method: string;
-  routeKey: string;
-  pathParameters?: { [key: string]: string };
+  body: string
+  headers: { [key: string]: string }
+  queryStringParameters: Record<string, string>
+  path: string
+  method: string
+  routeKey: string
+  pathParameters?: { [key: string]: string }
 }): APIGatewayProxyEventV2 => {
   return {
     version: '2.0',
@@ -113,8 +113,8 @@ export const mockAPIGatewayProxyEventV2 = ({
       time: 'mock',
       timeEpoch: 0,
     },
-  };
-};
+  }
+}
 
 export const mockAPIGatewayContext = (): Context => {
   return {
@@ -133,5 +133,5 @@ export const mockAPIGatewayContext = (): Context => {
     fail: () => {},
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     succeed: () => {},
-  };
-};
+  }
+}

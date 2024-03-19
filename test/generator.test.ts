@@ -1,35 +1,36 @@
-import { initTRPC } from '@trpc/server';
-import { observable } from '@trpc/server/observable';
-import openAPISchemaValidator from 'openapi-schema-validator';
-import { z } from 'zod';
+import { initTRPC } from '@trpc/server'
+import { observable } from '@trpc/server/observable'
+import openAPISchemaValidator from 'openapi-schema-validator'
+import { z } from 'zod'
 
 import {
   GenerateOpenApiDocumentOptions,
   OpenApiMeta,
   generateOpenApiDocument,
   openApiVersion,
-} from '../src';
-import * as zodUtils from '../src/utils/zod';
+} from '../src'
+import { errorResponseObject } from '../src/generator/schema'
+import * as zodUtils from '../src/utils/zod'
 
 // TODO: test for duplicate paths (using getPathRegExp)
 
-const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion });
+const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVersion })
 
-const t = initTRPC.meta<OpenApiMeta>().context<any>().create();
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
 
 const defaultDocOpts: GenerateOpenApiDocumentOptions = {
   title: 'tRPC OpenAPI',
   version: '1.0.0',
   baseUrl: 'http://localhost:3000/api',
-};
+}
 
 describe('generator', () => {
   test('open api version', () => {
-    expect(openApiVersion).toBe('3.0.3');
-  });
+    expect(openApiVersion).toBe('3.0.3')
+  })
 
   test('with empty router', () => {
-    const appRouter = t.router({});
+    const appRouter = t.router({})
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
       title: 'tRPC OpenAPI',
@@ -38,9 +39,9 @@ describe('generator', () => {
       baseUrl: 'http://localhost:3000/api',
       docsUrl: 'http://localhost:3000/docs',
       tags: [],
-    });
+    })
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument).toMatchInlineSnapshot(`
       Object {
         "components": Object {
@@ -108,8 +109,8 @@ describe('generator', () => {
         ],
         "tags": Array [],
       }
-    `);
-  });
+    `)
+  })
 
   test('with missing input', () => {
     {
@@ -118,11 +119,11 @@ describe('generator', () => {
           .meta({ openapi: { method: 'GET', path: '/no-input' } })
           .output(z.object({ name: z.string() }))
           .query(() => ({ name: 'vercjames' })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.noInput] - Input parser expects a Zod validator');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.noInput] - Input parser expects a Zod validator')
     }
     {
       const appRouter = t.router({
@@ -130,13 +131,13 @@ describe('generator', () => {
           .meta({ openapi: { method: 'POST', path: '/no-input' } })
           .output(z.object({ name: z.string() }))
           .mutation(() => ({ name: 'vercjames' })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[mutation.noInput] - Input parser expects a Zod validator');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[mutation.noInput] - Input parser expects a Zod validator')
     }
-  });
+  })
 
   test('with missing output', () => {
     {
@@ -145,11 +146,11 @@ describe('generator', () => {
           .meta({ openapi: { method: 'GET', path: '/no-output' } })
           .input(z.object({ name: z.string() }))
           .query(({ input }) => ({ name: input.name })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.noOutput] - Output parser expects a Zod validator');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.noOutput] - Output parser expects a Zod validator')
     }
     {
       const appRouter = t.router({
@@ -157,13 +158,13 @@ describe('generator', () => {
           .meta({ openapi: { method: 'POST', path: '/no-output' } })
           .input(z.object({ name: z.string() }))
           .mutation(({ input }) => ({ name: input.name })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[mutation.noOutput] - Output parser expects a Zod validator');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[mutation.noOutput] - Output parser expects a Zod validator')
     }
-  });
+  })
 
   test('with non-zod parser', () => {
     {
@@ -173,11 +174,11 @@ describe('generator', () => {
           .input((arg) => ({ payload: typeof arg === 'string' ? arg : String(arg) }))
           .output(z.object({ payload: z.string() }))
           .query(({ input }) => ({ payload: 'Hello world!' })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.badInput] - Input parser expects a Zod validator');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.badInput] - Input parser expects a Zod validator')
     }
     {
       const appRouter = t.router({
@@ -186,13 +187,13 @@ describe('generator', () => {
           .input(z.object({ payload: z.string() }))
           .output((arg) => ({ payload: typeof arg === 'string' ? arg : String(arg) }))
           .query(({ input }) => ({ payload: input.payload })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.badInput] - Output parser expects a Zod validator');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.badInput] - Output parser expects a Zod validator')
     }
-  });
+  })
 
   test('with non-object input', () => {
     {
@@ -202,11 +203,11 @@ describe('generator', () => {
           .input(z.string())
           .output(z.null())
           .query(() => null),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.badInput] - Input parser must be a ZodObject');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.badInput] - Input parser must be a ZodObject')
     }
     {
       const appRouter = t.router({
@@ -215,20 +216,20 @@ describe('generator', () => {
           .input(z.string())
           .output(z.null())
           .mutation(() => null),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[mutation.badInput] - Input parser must be a ZodObject');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[mutation.badInput] - Input parser must be a ZodObject')
     }
-  });
+  })
 
   test('with object non-string input', () => {
     // only applies when zod does not support (below version v3.20.0)
 
     // @ts-expect-error - hack to disable zodSupportsCoerce
     // eslint-disable-next-line import/namespace
-    zodUtils.zodSupportsCoerce = false;
+    zodUtils.zodSupportsCoerce = false
 
     {
       const appRouter = t.router({
@@ -237,11 +238,11 @@ describe('generator', () => {
           .input(z.object({ age: z.number().min(0).max(122) })) // RIP Jeanne Calment
           .output(z.object({ name: z.string() }))
           .query(() => ({ name: 'vercjames' })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.badInput] - Input parser key: "age" must be ZodString');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.badInput] - Input parser key: "age" must be ZodString')
     }
     {
       const appRouter = t.router({
@@ -250,11 +251,11 @@ describe('generator', () => {
           .input(z.object({ age: z.number().min(0).max(122) }))
           .output(z.object({ name: z.string() }))
           .mutation(() => ({ name: 'vercjames' })),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/ok-input']!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -278,13 +279,13 @@ describe('generator', () => {
           },
           "required": true,
         }
-      `);
+      `)
     }
 
     // @ts-expect-error - hack to re-enable zodSupportsCoerce
     // eslint-disable-next-line import/namespace
-    zodUtils.zodSupportsCoerce = true;
-  });
+    zodUtils.zodSupportsCoerce = true
+  })
 
   test('with bad method', () => {
     const appRouter = t.router({
@@ -294,12 +295,12 @@ describe('generator', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
         .query(({ input }) => ({ name: input.name })),
-    });
+    })
 
     expect(() => {
-      generateOpenApiDocument(appRouter, defaultDocOpts);
-    }).toThrowError('[query.badMethod] - Method must be GET, POST, PATCH, PUT or DELETE');
-  });
+      generateOpenApiDocument(appRouter, defaultDocOpts)
+    }).toThrowError('[query.badMethod] - Method must be GET, POST, PATCH, PUT or DELETE')
+  })
 
   test('with duplicate routes', () => {
     {
@@ -314,11 +315,11 @@ describe('generator', () => {
           .input(z.object({ name: z.string() }))
           .output(z.object({ name: z.string() }))
           .query(({ input }) => ({ name: input.name })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure')
     }
     {
       const appRouter = t.router({
@@ -332,13 +333,13 @@ describe('generator', () => {
           .input(z.object({ name: z.string() }))
           .output(z.object({ name: z.string() }))
           .query(({ input }) => ({ name: input.name })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure')
     }
-  });
+  })
 
   test('with unsupported subscription', () => {
     const appRouter = t.router({
@@ -347,16 +348,16 @@ describe('generator', () => {
         .input(z.object({ name: z.string() }))
         .subscription(({ input }) => {
           return observable((emit) => {
-            emit.next(input.name);
-            return () => null;
-          });
+            emit.next(input.name)
+            return () => null
+          })
         }),
-    });
+    })
 
     expect(() => {
-      generateOpenApiDocument(appRouter, defaultDocOpts);
-    }).toThrowError('[subscription.currentName] - Subscriptions are not supported by OpenAPI v3');
-  });
+      generateOpenApiDocument(appRouter, defaultDocOpts)
+    }).toThrowError('[subscription.currentName] - Subscriptions are not supported by OpenAPI v3')
+  })
 
   test('with void and path parameters', () => {
     const appRouter = t.router({
@@ -365,12 +366,12 @@ describe('generator', () => {
         .input(z.void())
         .output(z.object({ name: z.string() }))
         .query(() => ({ name: 'asdf' })),
-    });
+    })
 
     expect(() => {
-      generateOpenApiDocument(appRouter, defaultDocOpts);
-    }).toThrowError('[query.pathParameters] - Input parser must be a ZodObject');
-  });
+      generateOpenApiDocument(appRouter, defaultDocOpts)
+    }).toThrowError('[query.pathParameters] - Input parser must be a ZodObject')
+  })
 
   test('with optional path parameters', () => {
     const appRouter = t.router({
@@ -379,12 +380,12 @@ describe('generator', () => {
         .input(z.object({ name: z.string().optional() }))
         .output(z.object({ name: z.string() }))
         .query(() => ({ name: 'asdf' })),
-    });
+    })
 
     expect(() => {
-      generateOpenApiDocument(appRouter, defaultDocOpts);
-    }).toThrowError('[query.pathParameters] - Path parameter: "name" must not be optional');
-  });
+      generateOpenApiDocument(appRouter, defaultDocOpts)
+    }).toThrowError('[query.pathParameters] - Path parameter: "name" must not be optional')
+  })
 
   test('with missing path parameters', () => {
     const appRouter = t.router({
@@ -393,12 +394,12 @@ describe('generator', () => {
         .input(z.object({}))
         .output(z.object({ name: z.string() }))
         .query(() => ({ name: 'asdf' })),
-    });
+    })
 
     expect(() => {
-      generateOpenApiDocument(appRouter, defaultDocOpts);
-    }).toThrowError('[query.pathParameters] - Input parser expects key from path: "name"');
-  });
+      generateOpenApiDocument(appRouter, defaultDocOpts)
+    }).toThrowError('[query.pathParameters] - Input parser expects key from path: "name"')
+  })
 
   // test for https://github.com/vercjames/trpc-swagger/issues/296
   test('with post & only path paramters', () => {
@@ -413,12 +414,12 @@ describe('generator', () => {
         .input(z.object({}))
         .output(z.object({ name: z.string() }))
         .mutation(() => ({ name: 'James' })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/no-body/{name}']!.post!.requestBody).toBe(undefined);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+    expect(openApiDocument.paths['/no-body/{name}']!.post!.requestBody).toBe(undefined)
     expect(openApiDocument.paths['/empty-body']!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -433,8 +434,8 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
-  });
+    `)
+  })
 
   test('with valid procedures', () => {
     const appRouter = t.router({
@@ -463,11 +464,11 @@ describe('generator', () => {
         .input(z.object({ id: z.string() }))
         .output(z.void())
         .mutation(() => undefined),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument).toMatchInlineSnapshot(`
       Object {
         "components": Object {
@@ -789,8 +790,8 @@ describe('generator', () => {
         ],
         "tags": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with disabled', () => {
     const appRouter = t.router({
@@ -799,13 +800,13 @@ describe('generator', () => {
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
         .query(({ input }) => ({ id: input.id })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(Object.keys(openApiDocument.paths).length).toBe(0);
-  });
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+    expect(Object.keys(openApiDocument.paths).length).toBe(0)
+  })
 
   test('with summary, description & tags', () => {
     const appRouter = t.router({
@@ -822,15 +823,15 @@ describe('generator', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
         .query(({ input }) => ({ name: input.name })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary');
-    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description');
-    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tagA', 'tagB']);
-  });
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary')
+    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description')
+    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tagA', 'tagB'])
+  })
 
   test('with security', () => {
     const appRouter = t.router({
@@ -839,15 +840,15 @@ describe('generator', () => {
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
         .query(({ input }) => ({ name: input.name })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/secure/endpoint']!.post!.security).toEqual([
       { Authorization: [] },
-    ]);
-  });
+    ])
+  })
 
   test('with schema descriptions', () => {
     const appRouter = t.router({
@@ -884,11 +885,11 @@ describe('generator', () => {
             .describe('User data'),
         )
         .query(({ input }) => ({ id: input.id, name: 'James' })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
@@ -960,7 +961,7 @@ describe('generator', () => {
         "summary": undefined,
         "tags": undefined,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/user']!.get!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
@@ -1017,8 +1018,8 @@ describe('generator', () => {
         "summary": undefined,
         "tags": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with void', () => {
     {
@@ -1028,12 +1029,12 @@ describe('generator', () => {
           .input(z.void())
           .output(z.void())
           .query(() => undefined),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/void']!.get!.parameters).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+      expect(openApiDocument.paths['/void']!.get!.parameters).toEqual([])
       expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -1045,7 +1046,7 @@ describe('generator', () => {
           "description": "Successful response",
           "headers": undefined,
         }
-      `);
+      `)
     }
     {
       const appRouter = t.router({
@@ -1054,12 +1055,12 @@ describe('generator', () => {
           .input(z.void())
           .output(z.void())
           .mutation(() => undefined),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-      expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+      expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`)
       expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1071,9 +1072,9 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
+    `)
     }
-  });
+  })
 
   test('with null', () => {
     const appRouter = t.router({
@@ -1082,11 +1083,11 @@ describe('generator', () => {
         .input(z.void())
         .output(z.null())
         .mutation(() => null),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/null']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1103,8 +1104,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with undefined', () => {
     const appRouter = t.router({
@@ -1113,14 +1114,14 @@ describe('generator', () => {
         .input(z.undefined())
         .output(z.undefined())
         .mutation(() => undefined),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/undefined']!.post!.requestBody).toMatchInlineSnapshot(
       `undefined`,
-    );
+    )
     expect(openApiDocument.paths['/undefined']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1134,8 +1135,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with nullish', () => {
     const appRouter = t.router({
@@ -1144,11 +1145,11 @@ describe('generator', () => {
         .input(z.void())
         .output(z.string().nullish())
         .mutation(() => null),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/nullish']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1170,8 +1171,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with never', () => {
     const appRouter = t.router({
@@ -1181,12 +1182,12 @@ describe('generator', () => {
         .output(z.never())
         // @ts-expect-error - cannot return never
         .mutation(() => undefined),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/never']!.post!.requestBody).toMatchInlineSnapshot(`undefined`);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+    expect(openApiDocument.paths['/never']!.post!.requestBody).toMatchInlineSnapshot(`undefined`)
     expect(openApiDocument.paths['/never']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1200,8 +1201,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with optional query param', () => {
     const appRouter = t.router({
@@ -1215,11 +1216,11 @@ describe('generator', () => {
         .input(z.object({ one: z.string().optional(), two: z.string() }).optional())
         .output(z.string().optional())
         .query(({ input }) => input?.two),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/optional-param']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1243,7 +1244,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/optional-param']!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1264,7 +1265,7 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/optional-object']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1288,7 +1289,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/optional-object']!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1309,8 +1310,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with optional request body', () => {
     const appRouter = t.router({
@@ -1324,11 +1325,11 @@ describe('generator', () => {
         .input(z.object({ one: z.string().optional(), two: z.string() }).optional())
         .output(z.string().optional())
         .query(({ input }) => input?.two),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/optional-param']!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1353,7 +1354,7 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/optional-param']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1374,7 +1375,7 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/optional-object']!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1399,7 +1400,7 @@ describe('generator', () => {
         },
         "required": false,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/optional-object']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1420,8 +1421,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with default', () => {
     const appRouter = t.router({
@@ -1430,11 +1431,11 @@ describe('generator', () => {
         .input(z.object({ payload: z.string().default('James') }))
         .output(z.string().default('James'))
         .query(({ input }) => input.payload),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/default']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1449,7 +1450,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/default']!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1464,8 +1465,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with refine', () => {
     {
@@ -1475,11 +1476,11 @@ describe('generator', () => {
           .input(z.object({ a: z.string().refine((arg) => arg.length > 10) }))
           .output(z.null())
           .mutation(() => null),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -1501,7 +1502,7 @@ describe('generator', () => {
           },
           "required": true,
         }
-      `);
+      `)
     }
     {
       const appRouter = t.router({
@@ -1510,11 +1511,11 @@ describe('generator', () => {
           .input(z.object({ a: z.string(), b: z.string() }).refine((data) => data.a === data.b))
           .output(z.null())
           .mutation(() => null),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -1540,9 +1541,9 @@ describe('generator', () => {
           },
           "required": true,
         }
-      `);
+      `)
     }
-  });
+  })
 
   test('with async refine', () => {
     {
@@ -1553,11 +1554,11 @@ describe('generator', () => {
           .input(z.object({ a: z.string().refine(async (arg) => arg.length > 10) }))
           .output(z.null())
           .mutation(() => null),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -1579,7 +1580,7 @@ describe('generator', () => {
           },
           "required": true,
         }
-      `);
+      `)
     }
     {
       const appRouter = t.router({
@@ -1591,11 +1592,11 @@ describe('generator', () => {
           )
           .output(z.null())
           .mutation(() => null),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
@@ -1621,9 +1622,9 @@ describe('generator', () => {
           },
           "required": true,
         }
-      `);
+      `)
     }
-  });
+  })
 
   test('with transform', () => {
     const appRouter = t.router({
@@ -1632,11 +1633,11 @@ describe('generator', () => {
         .input(z.object({ age: z.string().transform((input) => parseInt(input)) }))
         .output(z.object({ age: z.string().transform((input) => parseInt(input)) }))
         .query(({ input }) => ({ age: input.age.toString() })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/transform']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1650,8 +1651,8 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('with preprocess', () => {
     const appRouter = t.router({
@@ -1661,19 +1662,19 @@ describe('generator', () => {
           z.object({
             payload: z.preprocess((arg) => {
               if (typeof arg === 'string') {
-                return parseInt(arg);
+                return parseInt(arg)
               }
-              return arg;
+              return arg
             }, z.number()),
           }),
         )
         .output(z.number())
         .query(({ input }) => input.payload),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/preprocess']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1687,7 +1688,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/preprocess']!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1701,8 +1702,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with coerce', () => {
     const appRouter = t.router({
@@ -1711,11 +1712,11 @@ describe('generator', () => {
         .input(z.object({ payload: z.number() }))
         .output(z.number())
         .query(({ input }) => input.payload),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/coerce']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1729,7 +1730,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/coerce']!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -1743,8 +1744,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with union', () => {
     {
@@ -1754,11 +1755,11 @@ describe('generator', () => {
           .input(z.object({ payload: z.string().or(z.object({})) }))
           .output(z.null())
           .query(() => null),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.union] - Input parser key: "payload" must be ZodString');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.union] - Input parser key: "payload" must be ZodString')
     }
     {
       const appRouter = t.router({
@@ -1767,11 +1768,11 @@ describe('generator', () => {
           .input(z.object({ payload: z.string().or(z.literal('James')) }))
           .output(z.null())
           .query(() => null),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/union']!.get!.parameters).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1795,9 +1796,9 @@ describe('generator', () => {
             },
           },
         ]
-      `);
+      `)
     }
-  });
+  })
 
   test('with intersection', () => {
     const appRouter = t.router({
@@ -1813,11 +1814,11 @@ describe('generator', () => {
         )
         .output(z.null())
         .query(() => null),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/intersection']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1864,8 +1865,8 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('with lazy', () => {
     const appRouter = t.router({
@@ -1874,11 +1875,11 @@ describe('generator', () => {
         .input(z.object({ payload: z.lazy(() => z.string()) }))
         .output(z.null())
         .query(() => null),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/lazy']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1892,8 +1893,8 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('with literal', () => {
     const appRouter = t.router({
@@ -1902,11 +1903,11 @@ describe('generator', () => {
         .input(z.object({ payload: z.literal('literal') }))
         .output(z.null())
         .query(() => null),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/literal']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1923,8 +1924,8 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('with enum', () => {
     const appRouter = t.router({
@@ -1933,11 +1934,11 @@ describe('generator', () => {
         .input(z.object({ name: z.enum(['James', 'vercjames']) }))
         .output(z.null())
         .query(() => null),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/enum']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -1955,8 +1956,8 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('with native-enum', () => {
     {
@@ -1971,11 +1972,11 @@ describe('generator', () => {
           .input(z.object({ name: z.nativeEnum(InvalidEnum) }))
           .output(z.null())
           .query(() => null),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[query.nativeEnum] - Input parser key: "name" must be ZodString');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[query.nativeEnum] - Input parser key: "name" must be ZodString')
     }
     {
       enum ValidEnum {
@@ -1989,11 +1990,11 @@ describe('generator', () => {
           .input(z.object({ name: z.nativeEnum(ValidEnum) }))
           .output(z.null())
           .query(() => null),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(openApiDocument.paths['/nativeEnum']!.get!.parameters).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2011,12 +2012,12 @@ describe('generator', () => {
             },
           },
         ]
-      `);
+      `)
     }
-  });
+  })
 
   test('with no refs', () => {
-    const schemas = { emails: z.array(z.string().email()) };
+    const schemas = { emails: z.array(z.string().email()) }
 
     const appRouter = t.router({
       refs: t.procedure
@@ -2024,11 +2025,11 @@ describe('generator', () => {
         .input(z.object({ allowed: schemas.emails, blocked: schemas.emails }))
         .output(z.object({ allowed: schemas.emails, blocked: schemas.emails }))
         .mutation(() => ({ allowed: [], blocked: [] })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/refs']!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2062,7 +2063,7 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/refs']!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2097,8 +2098,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with custom header', () => {
     const appRouter = t.router({
@@ -2119,11 +2120,11 @@ describe('generator', () => {
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
         .query(({ input }) => ({ id: input.id })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/echo']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2143,8 +2144,54 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
+
+  test('with extra response object', () => {
+    const appRouter = t.router({
+      echo: t.procedure
+        .meta({
+          openapi: {
+            method: 'GET',
+            path: '/echo',
+            extraResponses: {
+              400: {
+                description: 'Bad request',
+                content: z.object({ reason: z.string() }),
+              },
+            },
+          },
+        })
+        .input(z.object({ id: z.string() }))
+        .output(z.object({ id: z.string() }))
+        .query(({ input }) => ({ id: input.id })),
+    })
+
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
+
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+    expect(openApiDocument.paths['/echo']!.get!.responses['400']).toMatchInlineSnapshot(`
+      Object {
+        "content": Object {
+          "application/json": Object {
+            "schema": Object {
+              "additionalProperties": false,
+              "properties": Object {
+                "reason": Object {
+                  "type": "string",
+                },
+              },
+              "required": Array [
+                "reason",
+              ],
+              "type": "object",
+            },
+          },
+        },
+        "description": "Bad request",
+      }
+    `)
+  })
 
   test('with DELETE mutation', () => {
     const appRouter = t.router({
@@ -2153,14 +2200,14 @@ describe('generator', () => {
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
         .mutation(({ input }) => ({ id: input.id })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/mutation/delete']!.delete!.requestBody).toMatchInlineSnapshot(
       `undefined`,
-    );
+    )
     expect(openApiDocument.paths['/mutation/delete']!.delete!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2174,8 +2221,8 @@ describe('generator', () => {
           },
         },
       ]
-    `);
-  });
+    `)
+  })
 
   test('with POST query', () => {
     const appRouter = t.router({
@@ -2184,11 +2231,11 @@ describe('generator', () => {
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
         .query(({ input }) => ({ id: input.id })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/query/post']!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2210,11 +2257,11 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/query/post']!.post!.parameters).toMatchInlineSnapshot(
       `Array []`,
-    );
-  });
+    )
+  })
 
   test('with top-level preprocess', () => {
     const appRouter = t.router({
@@ -2228,11 +2275,11 @@ describe('generator', () => {
         .input(z.preprocess((arg) => arg, z.object({ id: z.string() })))
         .output(z.preprocess((arg) => arg, z.object({ id: z.string() })))
         .mutation(({ input }) => ({ id: input.id })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/top-level-preprocess']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2246,7 +2293,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/top-level-preprocess']!.post!.requestBody)
       .toMatchInlineSnapshot(`
       Object {
@@ -2269,8 +2316,8 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
-  });
+    `)
+  })
 
   test('with nested routers', () => {
     const appRouter = t.router({
@@ -2293,11 +2340,11 @@ describe('generator', () => {
             .query(({ input }) => ({ payload: input.payload })),
         }),
       }),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths).toMatchInlineSnapshot(`
       Object {
         "/procedure": Object {
@@ -2445,8 +2492,8 @@ describe('generator', () => {
           },
         },
       }
-    `);
-  });
+    `)
+  })
 
   test('with multiple inputs', () => {
     const appRouter = t.router({
@@ -2462,11 +2509,11 @@ describe('generator', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ id: z.string(), payload: z.string() }))
         .mutation(({ input }) => ({ id: input.id, payload: input.payload })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/query']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2490,7 +2537,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/mutation']!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2516,8 +2563,8 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
-  });
+    `)
+  })
 
   test('with content types', () => {
     {
@@ -2527,11 +2574,11 @@ describe('generator', () => {
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
           .mutation(({ input }) => ({ payload: input.payload })),
-      });
+      })
 
       expect(() => {
-        generateOpenApiDocument(appRouter, defaultDocOpts);
-      }).toThrowError('[mutation.withNone] - At least one content type must be specified');
+        generateOpenApiDocument(appRouter, defaultDocOpts)
+      }).toThrowError('[mutation.withNone] - At least one content type must be specified')
     }
     {
       const appRouter = t.router({
@@ -2569,32 +2616,32 @@ describe('generator', () => {
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
           .mutation(({ input }) => ({ payload: input.payload })),
-      });
+      })
 
-      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+      const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+      expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(
         Object.keys((openApiDocument.paths['/with-urlencoded']!.post!.requestBody as any).content),
-      ).toEqual(['application/x-www-form-urlencoded']);
+      ).toEqual(['application/x-www-form-urlencoded'])
       expect(
         Object.keys((openApiDocument.paths['/with-json']!.post!.requestBody as any).content),
-      ).toEqual(['application/json']);
+      ).toEqual(['application/json'])
       expect(
         Object.keys((openApiDocument.paths['/with-all']!.post!.requestBody as any).content),
-      ).toEqual(['application/json', 'application/x-www-form-urlencoded']);
+      ).toEqual(['application/json', 'application/x-www-form-urlencoded'])
       expect(
         (openApiDocument.paths['/with-all']!.post!.requestBody as any).content['application/json'],
       ).toEqual(
         (openApiDocument.paths['/with-all']!.post!.requestBody as any).content[
           'application/x-www-form-urlencoded'
         ],
-      );
+      )
       expect(
         Object.keys((openApiDocument.paths['/with-default']!.post!.requestBody as any).content),
-      ).toEqual(['application/json']);
+      ).toEqual(['application/json'])
     }
-  });
+  })
 
   test('with deprecated', () => {
     const appRouter = t.router({
@@ -2603,13 +2650,13 @@ describe('generator', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
-    expect(openApiDocument.paths['/deprecated']!.post!.deprecated).toEqual(true);
-  });
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
+    expect(openApiDocument.paths['/deprecated']!.post!.deprecated).toEqual(true)
+  })
 
   test('with security schemes', () => {
     const appRouter = t.router({
@@ -2618,7 +2665,7 @@ describe('generator', () => {
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .mutation(({ input }) => ({ payload: input.payload })),
-    });
+    })
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
       ...defaultDocOpts,
@@ -2629,18 +2676,18 @@ describe('generator', () => {
           name: 'X-API-Key',
         },
       },
-    });
+    })
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.components!.securitySchemes).toEqual({
       ApiKey: {
         type: 'apiKey',
         in: 'header',
         name: 'X-API-Key',
       },
-    });
-    expect(openApiDocument.paths['/protected']!.post!.security).toEqual([{ ApiKey: [] }]);
-  });
+    })
+    expect(openApiDocument.paths['/protected']!.post!.security).toEqual([{ ApiKey: [] }])
+  })
 
   test('with examples', () => {
     const appRouter = t.router({
@@ -2676,11 +2723,11 @@ describe('generator', () => {
         .mutation(({ input }) => ({
           output: `${input.greeting} ${input.name}`,
         })),
-    });
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2704,7 +2751,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/query-example/{name}']!.get!.responses[200])
       .toMatchInlineSnapshot(`
       Object {
@@ -2730,7 +2777,7 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/mutation-example/{name}']!.post!.parameters)
       .toMatchInlineSnapshot(`
       Array [
@@ -2745,7 +2792,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/mutation-example/{name}']!.post!.requestBody)
       .toMatchInlineSnapshot(`
       Object {
@@ -2770,7 +2817,7 @@ describe('generator', () => {
         },
         "required": true,
       }
-    `);
+    `)
     expect(openApiDocument.paths['/mutation-example/{name}']!.post!.responses[200])
       .toMatchInlineSnapshot(`
       Object {
@@ -2796,8 +2843,8 @@ describe('generator', () => {
         "description": "Successful response",
         "headers": undefined,
       }
-    `);
-  });
+    `)
+  })
 
   test('with response headers', () => {
     const appRouter = t.router({
@@ -2807,31 +2854,31 @@ describe('generator', () => {
             method: 'GET',
             path: '/query-example/{name}',
             responseHeaders: {
-              "X-RateLimit-Limit": {
-                description: "Request limit per hour.",
+              'X-RateLimit-Limit': {
+                description: 'Request limit per hour.',
                 schema: {
-                  type: "integer"
-                }
+                  type: 'integer',
+                },
               },
-              "X-RateLimit-Remaining": {
-                description: "The number of requests left for the time window.",
+              'X-RateLimit-Remaining': {
+                description: 'The number of requests left for the time window.',
                 schema: {
-                  type: "integer"
-                }
-              }
-            }
+                  type: 'integer',
+                },
+              },
+            },
           },
         })
         .input(z.object({ name: z.string(), greeting: z.string() }))
         .output(z.object({ output: z.string() }))
         .query(({ input }) => ({
           output: `${input.greeting} ${input.name}`,
-        }))
-    });
+        })),
+    })
 
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts);
+    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([]);
+    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2855,7 +2902,7 @@ describe('generator', () => {
           },
         },
       ]
-    `);
+    `)
     expect(openApiDocument.paths['/query-example/{name}']!.get!.responses[200])
       .toMatchInlineSnapshot(`
       Object {
@@ -2892,6 +2939,6 @@ describe('generator', () => {
           },
         },
       }
-    `);
-  });
-});
+    `)
+  })
+})

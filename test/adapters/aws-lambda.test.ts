@@ -1,30 +1,30 @@
-import { inferAsyncReturnType, initTRPC } from '@trpc/server';
+import { inferAsyncReturnType, initTRPC } from '@trpc/server'
 import {
   CreateAWSLambdaContextOptions,
   UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
-} from '@trpc/server/adapters/aws-lambda';
-import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from 'aws-lambda';
-import z from 'zod';
+} from '@trpc/server/adapters/aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from 'aws-lambda'
+import z from 'zod'
 
-import { OpenApiMeta, createOpenApiAwsLambdaHandler } from '../../src';
+import { OpenApiMeta, createOpenApiAwsLambdaHandler } from '../../src'
 import {
   mockAPIGatewayContext,
   mockAPIGatewayProxyEventV1,
   mockAPIGatewayProxyEventV2,
-} from './aws-lambda.utils';
+} from './aws-lambda.utils'
 
 const createContextV1 = ({ event }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) => {
-  return { user: event.headers['X-USER'] };
-};
+  return { user: event.headers['X-USER'] }
+}
 const createContextV2 = ({ event }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) => {
-  return { user: event.headers['X-USER'] };
-};
+  return { user: event.headers['X-USER'] }
+}
 
 const createRouter = (createContext: (obj: any) => { user?: string }) => {
   const t = initTRPC
     .context<inferAsyncReturnType<typeof createContext>>()
     .meta<OpenApiMeta>()
-    .create();
+    .create()
 
   return t.router({
     getHello: t.procedure
@@ -41,17 +41,17 @@ const createRouter = (createContext: (obj: any) => { user?: string }) => {
       .mutation(({ input, ctx }) => ({
         greeting: `Hello ${ctx.user ?? input.name}`,
       })),
-  });
-};
+  })
+}
 
-const ctx = mockAPIGatewayContext();
+const ctx = mockAPIGatewayContext()
 
 describe('v1', () => {
-  const routerV1 = createRouter(createContextV1);
+  const routerV1 = createRouter(createContextV1)
   const handler = createOpenApiAwsLambdaHandler({
     router: routerV1,
     createContext: createContextV1,
-  });
+  })
 
   test('with query input', async () => {
     const {
@@ -72,17 +72,17 @@ describe('v1', () => {
         resource: '/hello',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello James',
-    });
-  });
+    })
+  })
 
   test('with JSON body input', async () => {
     const {
@@ -103,17 +103,17 @@ describe('v1', () => {
         resource: '/hello',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello Aphex',
-    });
-  });
+    })
+  })
 
   test('with url encoded body input', async () => {
     const {
@@ -132,17 +132,17 @@ describe('v1', () => {
         resource: '/hello',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello Aphex',
-    });
-  });
+    })
+  })
 
   test('with context', async () => {
     const {
@@ -162,17 +162,17 @@ describe('v1', () => {
         resource: '/hello',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello Twin',
-    });
-  });
+    })
+  })
 
   test('with bad input', async () => {
     const {
@@ -191,13 +191,13 @@ describe('v1', () => {
         resource: '/hello',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(400);
+    expect(statusCode).toBe(400)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       message: 'Input validation failed',
       code: 'BAD_REQUEST',
@@ -210,8 +210,8 @@ describe('v1', () => {
           received: 'undefined',
         },
       ],
-    });
-  });
+    })
+  })
 
   test('with invalid body', async () => {
     const {
@@ -230,18 +230,18 @@ describe('v1', () => {
         resource: '/hello',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(400);
+    expect(statusCode).toBe(400)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       message: 'Failed to parse request body',
       code: 'PARSE_ERROR',
-    });
-  });
+    })
+  })
 
   test('with bad event', async () => {
     const {
@@ -252,26 +252,26 @@ describe('v1', () => {
       // @ts-expect-error - invalid event
       { version: 'asdf' },
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(500);
+    expect(statusCode).toBe(500)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       message: UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
       code: 'INTERNAL_SERVER_ERROR',
-    });
-  });
-});
+    })
+  })
+})
 
 describe('v2', () => {
-  const router = createRouter(createContextV2);
+  const router = createRouter(createContextV2)
   const handler = createOpenApiAwsLambdaHandler({
     router,
     createContext: createContextV2,
-  });
+  })
 
   test('with query input', async () => {
     const {
@@ -292,17 +292,17 @@ describe('v2', () => {
         routeKey: '$default',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello James',
-    });
-  });
+    })
+  })
 
   test('with JSON body input', async () => {
     const {
@@ -323,17 +323,17 @@ describe('v2', () => {
         routeKey: '$default',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello Aphex',
-    });
-  });
+    })
+  })
 
   test('with url encoded body input', async () => {
     const {
@@ -352,17 +352,17 @@ describe('v2', () => {
         routeKey: '$default',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello Aphex',
-    });
-  });
+    })
+  })
 
   test('with context', async () => {
     const {
@@ -382,17 +382,17 @@ describe('v2', () => {
         routeKey: '$default',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(200);
+    expect(statusCode).toBe(200)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       greeting: 'Hello Twin',
-    });
-  });
+    })
+  })
 
   test('with bad input', async () => {
     const {
@@ -411,13 +411,13 @@ describe('v2', () => {
         routeKey: '$default',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(400);
+    expect(statusCode).toBe(400)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       message: 'Input validation failed',
       code: 'BAD_REQUEST',
@@ -430,8 +430,8 @@ describe('v2', () => {
           received: 'undefined',
         },
       ],
-    });
-  });
+    })
+  })
 
   test('with invalid body', async () => {
     const {
@@ -450,18 +450,18 @@ describe('v2', () => {
         routeKey: '$default',
       }),
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(400);
+    expect(statusCode).toBe(400)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       message: 'Failed to parse request body',
       code: 'PARSE_ERROR',
-    });
-  });
+    })
+  })
 
   test('with bad event', async () => {
     const {
@@ -472,16 +472,16 @@ describe('v2', () => {
       // @ts-expect-error - invalid event
       { version: 'asdf' },
       ctx,
-    );
-    const body = JSON.parse(rawBody);
+    )
+    const body = JSON.parse(rawBody)
 
-    expect(statusCode).toBe(500);
+    expect(statusCode).toBe(500)
     expect(headers).toEqual({
       'content-type': 'application/json',
-    });
+    })
     expect(body).toEqual({
       message: UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
       code: 'INTERNAL_SERVER_ERROR',
-    });
-  });
-});
+    })
+  })
+})

@@ -1,17 +1,17 @@
 export type User = {
-  id: string;
-  email: string;
-  passcode: string;
-  name: string;
-};
+  id: string
+  email: string
+  passcode: string
+  name: string
+}
 
 export type Post = {
-  id: string;
-  content: string;
-  userId: string;
-};
+  id: string
+  content: string
+  userId: string
+}
 
-export const database: { users: User[]; posts: Post[] } = {
+export const database: { users: User[] posts: Post[] } = {
   users: [
     {
       id: '3dcb4a1f-0c91-42c5-834f-26d227c532e2',
@@ -64,4 +64,4 @@ export const database: { users: User[]; posts: Post[] } = {
       userId: '2ee1c07c-7537-48f5-b5d8-8740e165cd62',
     },
   ],
-};
+}
