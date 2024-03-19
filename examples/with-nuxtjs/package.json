@@ -1,0 +1,19 @@
+{
+  "name": "with-nuxtjs",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.3",
+    "nuxt": "^3.5.1"
+  },
+  "dependencies": {
+    "@trpc/server": "^10.27.1",
+    "trpc-nuxt": "^0.10.3"
+  }
+}
