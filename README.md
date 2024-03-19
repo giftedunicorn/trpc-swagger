@@ -13,7 +13,7 @@
 
 ---
 
-## Modified fork    
+## Fork Notice    
 this repo originally came from [trpc-openapi](https://github.com/jlalmes/trpc-openapi) and has been modify as the old repo appears to no longer be maintained. 
 
 ## **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
