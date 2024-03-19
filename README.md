@@ -52,7 +52,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input }) => {
       return { greeting: `Hello ${input.name}!` };
-    });
+    }),
 });
 ```
 
@@ -139,7 +139,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .query(({ input }) => {
       return { greeting: `${input.greeting} ${input.name}!` };
-    });
+    }),
 });
 
 // Client
@@ -160,7 +160,7 @@ export const appRouter = t.router({
     .output(z.object({ greeting: z.string() }))
     .mutation(({ input }) => {
       return { greeting: `${input.greeting} ${input.name}!` };
-    });
+    }),
 });
 
 // Client
