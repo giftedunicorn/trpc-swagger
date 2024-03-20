@@ -1,12 +1,12 @@
-import * as trpc from '@trpc/server'
-import { OpenApiMeta } from 'trpc-swagger'
-import { z } from 'zod'
+import * as trpc from "@trpc/server"
+import { OpenApiMeta } from "trpc-swagger"
+import { z } from "zod"
 
-const appRouter = trpc.router<any, OpenApiMeta>().query('echo', {
-  meta: { openapi: { enabled: true, method: 'GET', path: '/echo' } },
+const appRouter = trpc.router<any, OpenApiMeta>().query("echo", {
+  meta: { openapi: { enabled: true, method: "GET", path: "/echo" } },
   input: z.object({ payload: z.string() }),
   output: z.object({ payload: z.string() }),
-  resolve: ({ input }) => input,
+  resolve: ({ input }) => input
 })
 
 export const trpcV10AppRouter = appRouter.interop()

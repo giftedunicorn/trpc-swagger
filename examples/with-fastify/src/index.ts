@@ -1,18 +1,11 @@
-/* 
-  eslint-disable
-  @typescript-eslint/no-misused-promises,
-  @typescript-eslint/no-unsafe-argument,
-  @typescript-eslint/no-explicit-any,
-  promise/always-return
- */
-import cors from '@fastify/cors'
-import fastifySwagger from '@fastify/swagger'
-import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify'
-import Fastify from 'fastify'
-import { fastifyTRPCOpenApiPlugin } from 'trpc-swagger'
+import cors from "@fastify/cors"
+import fastifySwagger from "@fastify/swagger"
+import { fastifyTRPCPlugin } from "@trpc/server/adapters/fastify"
+import Fastify from "fastify"
+import { fastifyTRPCOpenApiPlugin } from "trpc-swagger"
 
-import { openApiDocument } from './openapi'
-import { appRouter, createContext } from './router'
+import { openApiDocument } from "./openapi"
+import { appRouter, createContext } from "./router"
 
 const app = Fastify()
 
@@ -22,28 +15,28 @@ async function main() {
 
   // Handle incoming tRPC requests
   await app.register(fastifyTRPCPlugin, {
-    prefix: '/trpc',
+    prefix: "/trpc",
     useWss: false,
-    trpcOptions: { router: appRouter, createContext },
+    trpcOptions: { router: appRouter, createContext }
   } as any)
 
   // Handle incoming OpenAPI requests
   await app.register(fastifyTRPCOpenApiPlugin, {
-    basePath: '/api',
+    basePath: "/api",
     router: appRouter,
-    createContext,
+    createContext
   })
 
   // Serve the OpenAPI document
-  app.get('/openapi.json', () => openApiDocument)
+  app.get("/openapi.json", () => openApiDocument)
 
   // Server Swagger UI
   await app.register(fastifySwagger, {
-    routePrefix: '/docs',
-    mode: 'static',
+    routePrefix: "/docs",
+    mode: "static",
     specification: { document: openApiDocument },
     uiConfig: { displayOperationId: true },
-    exposeRoute: true,
+    exposeRoute: true
   })
 
   await app

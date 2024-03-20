@@ -106,11 +106,11 @@ describe("next adapter", () => {
     {
       const res = await openApiNextHandlerCaller({
         method: "GET",
-        query: { trpc: "say-hello", name: "James" }
+        query: { trpc: "say-hello", name: "Verc" }
       })
 
       expect(res.statusCode).toBe(200)
-      expect(res.body).toEqual({ greeting: "Hello James!" })
+      expect(res.body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -121,11 +121,11 @@ describe("next adapter", () => {
       const res = await openApiNextHandlerCaller({
         method: "POST",
         query: { trpc: "say-hello" },
-        body: { name: "James" }
+        body: { name: "Verc" }
       })
 
       expect(res.statusCode).toBe(200)
-      expect(res.body).toEqual({ greeting: "Hello James!" })
+      expect(res.body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -135,11 +135,11 @@ describe("next adapter", () => {
     {
       const res = await openApiNextHandlerCaller({
         method: "GET",
-        query: { trpc: ["say", "hello"], name: "James" }
+        query: { trpc: ["say", "hello"], name: "Verc" }
       })
 
       expect(res.statusCode).toBe(200)
-      expect(res.body).toEqual({ greeting: "Hello James!" })
+      expect(res.body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)

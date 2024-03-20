@@ -1,8 +1,8 @@
 {
   "name": "trpc-swagger",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "tRPC Swagger Wrapper",
-  "private": false,
+  "private": true,
   "license": "MIT",
   "keywords": [
     "trpc",
@@ -17,6 +17,16 @@
   "bugs": "https://github.com/vercjames/trpc-swagger/issues",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "workspaces": [
+    ".",
+    "examples/with-express",
+    "examples/with-fastify",
+    "examples/with-interop",
+    "examples/with-nextjs",
+    "examples/with-nextjs14",
+    "examples/with-nuxtjs",
+    "examples/with-serverless"
+  ],
   "scripts": {
     "test": "tsc --noEmit && jest --verbose",
     "build": "rimraf dist && tsc -p tsconfig.build.json",
@@ -39,7 +49,6 @@
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^4.1.1",
     "@trpc/client": "^10.27.1",
-    "@trpc/server": "^10.45.2",
     "@types/aws-lambda": "^8.10.115",
     "@types/co-body": "^6.1.0",
     "@types/express": "^4.17.17",
@@ -67,7 +76,6 @@
     "superjson": "^1.12.3",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4",
-    "zod": "^3.22.4"
+    "typescript": "^5.0.4"
   }
 }

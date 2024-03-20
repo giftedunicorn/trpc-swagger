@@ -117,7 +117,7 @@ describe("generator", () => {
         noInput: t.procedure
           .meta({ openapi: { method: "GET", path: "/no-input" } })
           .output(z.object({ name: z.string() }))
-          .query(() => ({ name: "jlalmes" }))
+          .query(() => ({ name: "James" }))
       })
 
       expect(() => {
@@ -129,7 +129,7 @@ describe("generator", () => {
         noInput: t.procedure
           .meta({ openapi: { method: "POST", path: "/no-input" } })
           .output(z.object({ name: z.string() }))
-          .mutation(() => ({ name: "jlalmes" }))
+          .mutation(() => ({ name: "James" }))
       })
 
       expect(() => {
@@ -236,7 +236,7 @@ describe("generator", () => {
           .meta({ openapi: { method: "GET", path: "/bad-input" } })
           .input(z.object({ age: z.number().min(0).max(122) })) // RIP Jeanne Calment
           .output(z.object({ name: z.string() }))
-          .query(() => ({ name: "jlalmes" }))
+          .query(() => ({ name: "James" }))
       })
 
       expect(() => {
@@ -249,7 +249,7 @@ describe("generator", () => {
           .meta({ openapi: { method: "POST", path: "/ok-input" } })
           .input(z.object({ age: z.number().min(0).max(122) }))
           .output(z.object({ name: z.string() }))
-          .mutation(() => ({ name: "jlalmes" }))
+          .mutation(() => ({ name: "James" }))
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
@@ -400,7 +400,7 @@ describe("generator", () => {
     }).toThrowError("[query.pathParameters] - Input parser expects key from path: \"name\"")
   })
 
-  // test for https://github.com/jlalmes/trpc-openapi/issues/296
+  // test for https://github.com/James/trpc-openapi/issues/296
   test("with post & only path paramters", () => {
     const appRouter = t.router({
       noBody: t.procedure
@@ -412,7 +412,7 @@ describe("generator", () => {
         .meta({ openapi: { method: "POST", path: "/empty-body" } })
         .input(z.object({}))
         .output(z.object({ name: z.string() }))
-        .mutation(() => ({ name: "James" }))
+        .mutation(() => ({ name: "Verc" }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
@@ -869,7 +869,7 @@ describe("generator", () => {
             })
             .describe("User data")
         )
-        .mutation(({ input }) => ({ id: input.id, name: "James" })),
+        .mutation(({ input }) => ({ id: input.id, name: "Verc" })),
       getUser: t.procedure
         .meta({ openapi: { method: "GET", path: "/user" } })
         .input(
@@ -883,7 +883,7 @@ describe("generator", () => {
             })
             .describe("User data")
         )
-        .query(({ input }) => ({ id: input.id, name: "James" }))
+        .query(({ input }) => ({ id: input.id, name: "Verc" }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
@@ -1427,8 +1427,8 @@ describe("generator", () => {
     const appRouter = t.router({
       default: t.procedure
         .meta({ openapi: { method: "GET", path: "/default" } })
-        .input(z.object({ payload: z.string().default("James") }))
-        .output(z.string().default("James"))
+        .input(z.object({ payload: z.string().default("Verc") }))
+        .output(z.string().default("Verc"))
         .query(({ input }) => input.payload)
     })
 
@@ -1444,7 +1444,7 @@ describe("generator", () => {
           "name": "payload",
           "required": false,
           "schema": Object {
-            "default": "James",
+            "default": "Verc",
             "type": "string",
           },
         },
@@ -1456,7 +1456,7 @@ describe("generator", () => {
           "application/json": Object {
             "example": undefined,
             "schema": Object {
-              "default": "James",
+              "default": "Verc",
               "type": "string",
             },
           },
@@ -1764,7 +1764,7 @@ describe("generator", () => {
       const appRouter = t.router({
         union: t.procedure
           .meta({ openapi: { method: "GET", path: "/union" } })
-          .input(z.object({ payload: z.string().or(z.literal("James")) }))
+          .input(z.object({ payload: z.string().or(z.literal("Verc")) }))
           .output(z.null())
           .query(() => null)
       })
@@ -1787,7 +1787,7 @@ describe("generator", () => {
                 },
                 Object {
                   "enum": Array [
-                    "James",
+                    "Verc",
                   ],
                   "type": "string",
                 },
@@ -1930,7 +1930,7 @@ describe("generator", () => {
     const appRouter = t.router({
       enum: t.procedure
         .meta({ openapi: { method: "GET", path: "/enum" } })
-        .input(z.object({ name: z.enum(["James", "jlalmes"]) }))
+        .input(z.object({ name: z.enum(["Verc", "James"]) }))
         .output(z.null())
         .query(() => null)
     })
@@ -1948,8 +1948,8 @@ describe("generator", () => {
           "required": true,
           "schema": Object {
             "enum": Array [
+              "Verc",
               "James",
-              "jlalmes",
             ],
             "type": "string",
           },
@@ -1961,8 +1961,8 @@ describe("generator", () => {
   test("with native-enum", () => {
     {
       enum InvalidEnum {
+        Verc,
         James,
-        jlalmes,
       }
 
       const appRouter = t.router({
@@ -1979,8 +1979,8 @@ describe("generator", () => {
     }
     {
       enum ValidEnum {
+        Verc = "Verc",
         James = "James",
-        jlalmes = "jlalmes",
       }
 
       const appRouter = t.router({
@@ -2004,8 +2004,8 @@ describe("generator", () => {
             "required": true,
             "schema": Object {
               "enum": Array [
+                "Verc",
                 "James",
-                "jlalmes",
               ],
               "type": "string",
             },
@@ -2650,8 +2650,8 @@ describe("generator", () => {
             method: "GET",
             path: "/query-example/{name}",
             example: {
-              request: { name: "James", greeting: "Hello" },
-              response: { output: "Hello James" }
+              request: { name: "Verc", greeting: "Hello" },
+              response: { output: "Hello Verc" }
             }
           }
         })
@@ -2666,8 +2666,8 @@ describe("generator", () => {
             method: "POST",
             path: "/mutation-example/{name}",
             example: {
-              request: { name: "James", greeting: "Hello" },
-              response: { output: "Hello James" }
+              request: { name: "Verc", greeting: "Hello" },
+              response: { output: "Hello Verc" }
             }
           }
         })
@@ -2685,7 +2685,7 @@ describe("generator", () => {
       Array [
         Object {
           "description": undefined,
-          "example": "James",
+          "example": "Verc",
           "in": "path",
           "name": "name",
           "required": true,
@@ -2711,7 +2711,7 @@ describe("generator", () => {
         "content": Object {
           "application/json": Object {
             "example": Object {
-              "output": "Hello James",
+              "output": "Hello Verc",
             },
             "schema": Object {
               "additionalProperties": false,
@@ -2736,7 +2736,7 @@ describe("generator", () => {
       Array [
         Object {
           "description": undefined,
-          "example": "James",
+          "example": "Verc",
           "in": "path",
           "name": "name",
           "required": true,
@@ -2777,7 +2777,7 @@ describe("generator", () => {
         "content": Object {
           "application/json": Object {
             "example": Object {
-              "output": "Hello James",
+              "output": "Hello Verc",
             },
             "schema": Object {
               "additionalProperties": false,

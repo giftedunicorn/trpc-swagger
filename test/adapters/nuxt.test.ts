@@ -123,11 +123,11 @@ describe("nuxt adapter", () => {
       const res = await openApiNuxtHandlerCaller({
         method: "GET",
         params: { trpc: "say-hello" },
-        url: "/api/say-hello?name=James"
+        url: "/api/say-hello?name=Verc"
       })
 
       expect(res.statusCode).toBe(200)
-      expect(res.body).toEqual({ greeting: "Hello James!" })
+      expect(res.body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -138,11 +138,11 @@ describe("nuxt adapter", () => {
       const res = await openApiNuxtHandlerCaller({
         method: "POST",
         params: { trpc: "say-hello" },
-        body: { name: "James" }
+        body: { name: "Verc" }
       })
 
       expect(res.statusCode).toBe(200)
-      expect(res.body).toEqual({ greeting: "Hello James!" })
+      expect(res.body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -153,11 +153,11 @@ describe("nuxt adapter", () => {
       const res = await openApiNuxtHandlerCaller({
         method: "GET",
         params: { trpc: "say/hello" },
-        url: "/api/say/hello?name=James"
+        url: "/api/say/hello?name=Verc"
       })
 
       expect(res.statusCode).toBe(200)
-      expect(res.body).toEqual({ greeting: "Hello James!" })
+      expect(res.body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)

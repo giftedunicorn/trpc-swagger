@@ -16,7 +16,7 @@
 - OpenAPI version 3.0.3.
 
 ## Fork Notice
-The original repo [trpc-openapi](https://github.com/jlalmes/trpc-openapi) no longer appears to be maintained. 
+The original repo [trpc-openapi](https://github.com/James/trpc-openapi) no longer appears to be maintained. 
 The goal of this fork is to add more control for error responses, support more frameworks, and support the new procedure types in @trpc v11.x.x.
 PRs Are welcome
 
@@ -128,8 +128,8 @@ server.listen(3000)
 
 ```typescript
 // client.ts
-const res = await fetch('http://localhost:3000/say-hello?name=James', { method: 'GET' })
-const body = await res.json() /* { greeting: 'Hello James!' } */
+const res = await fetch('http://localhost:3000/say-hello?name=Verc', { method: 'GET' })
+const body = await res.json() /* { greeting: 'Hello Verc!' } */
 ```
 
 ## Requirements
@@ -183,10 +183,10 @@ export const appRouter = t.router({
 })
 
 // Client
-const res = await fetch('http://localhost:3000/say-hello/James?greeting=Hello' /* 👈 */, {
+const res = await fetch('http://localhost:3000/say-hello/Verc?greeting=Hello' /* 👈 */, {
   method: 'GET',
 })
-const body = await res.json() /* { greeting: 'Hello James!' } */
+const body = await res.json() /* { greeting: 'Hello Verc!' } */
 ```
 
 ### Request body
@@ -204,12 +204,12 @@ export const appRouter = t.router({
 })
 
 // Client
-const res = await fetch('http://localhost:3000/say-hello/James' /* 👈 */, {
+const res = await fetch('http://localhost:3000/say-hello/Verc' /* 👈 */, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ greeting: 'Hello' }),
 })
-const body = await res.json() /* { greeting: 'Hello James!' } */
+const body = await res.json() /* { greeting: 'Hello Verc!' } */
 ```
 
 ### Custom headers
@@ -264,7 +264,7 @@ type User = { id: string, name: string }
 const users: User[] = [
   {
     id: 'usr_123',
-    name: 'James',
+    name: 'Verc',
   },
 ]
 
@@ -302,7 +302,7 @@ const res = await fetch('http://localhost:3000/say-hello', {
   method: 'GET',
   headers: { Authorization: 'Bearer usr_123' } /* 👈 */,
 })
-const body = await res.json() /* { greeting: 'Hello James!' } */
+const body = await res.json() /* { greeting: 'Hello Verc!' } */
 ```
 
 ## Examples

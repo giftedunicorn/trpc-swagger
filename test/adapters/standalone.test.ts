@@ -159,7 +159,7 @@ describe("standalone adapter", () => {
 
     const res = await fetch(`${url}/echo`, {
       method: "POST",
-      body: JSON.stringify("James")
+      body: JSON.stringify("Verc")
     })
     const body = (await res.json()) as OpenApiErrorResponse
 
@@ -320,7 +320,7 @@ describe("standalone adapter", () => {
     const res = await fetch(`${url}/echo`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload: "@jlalmes" })
+      body: JSON.stringify({ payload: "@James" })
     })
     const body = (await res.json()) as OpenApiErrorResponse
 
@@ -355,11 +355,11 @@ describe("standalone adapter", () => {
     })
 
     {
-      const res = await fetch(`${url}/say-hello?name=James`, { method: "GET" })
+      const res = await fetch(`${url}/say-hello?name=Verc`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -370,12 +370,12 @@ describe("standalone adapter", () => {
       const res = await fetch(`${url}/say-hello`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "James" })
+        body: JSON.stringify({ name: "Verc" })
       })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -476,12 +476,12 @@ describe("standalone adapter", () => {
       router: appRouter
     })
 
-    const res = await fetch(`${url}/echo?payload=jlalmes`, { method: "GET" })
+    const res = await fetch(`${url}/echo?payload=James`, { method: "GET" })
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body).toEqual({
-      payload: "jlalmes",
+      payload: "James",
       context: { id: 1234567890 }
     })
     expect(responseMetaMock).toHaveBeenCalledTimes(1)
@@ -504,13 +504,13 @@ describe("standalone adapter", () => {
       responseMeta: () => ({ status: 202, headers: { "x-custom": "custom header" } })
     })
 
-    const res = await fetch(`${url}/echo?payload=jlalmes`, { method: "GET" })
+    const res = await fetch(`${url}/echo?payload=James`, { method: "GET" })
     const body = await res.json()
 
     expect(res.status).toBe(202)
     expect(res.headers.get("x-custom")).toBe("custom header")
     expect(body).toEqual({
-      payload: "jlalmes",
+      payload: "James",
       context: undefined
     })
     expect(createContextMock).toHaveBeenCalledTimes(1)
@@ -536,12 +536,12 @@ describe("standalone adapter", () => {
       router: appRouter
     })
 
-    const res = await fetch(`${url}/echo?payload=jlalmes`, { method: "GET" })
+    const res = await fetch(`${url}/echo?payload=James`, { method: "GET" })
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body).toEqual({
-      payload: "jlalmes"
+      payload: "James"
     })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)
@@ -584,7 +584,7 @@ describe("standalone adapter", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       // @ts-expect-error - not JSON.stringified
-      body: { payload: "James" }
+      body: { payload: "Verc" }
     })
     const body = (await res.json()) as OpenApiErrorResponse
 
@@ -609,7 +609,7 @@ describe("standalone adapter", () => {
         .mutation(({ input }) => ({ payload: input.payload }))
     })
 
-    const requestBody = JSON.stringify({ payload: "James" })
+    const requestBody = JSON.stringify({ payload: "Verc" })
 
     const { url, close } = createHttpServerWithRouter({
       router: appRouter,
@@ -626,7 +626,7 @@ describe("standalone adapter", () => {
 
       expect(res.status).toBe(200)
       expect(body).toEqual({
-        payload: "James"
+        payload: "Verc"
       })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
@@ -638,7 +638,7 @@ describe("standalone adapter", () => {
       const res = await fetch(`${url}/echo`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ payload: "James!" })
+        body: JSON.stringify({ payload: "Verc!" })
       })
       const body = (await res.json()) as OpenApiErrorResponse
 
@@ -669,11 +669,11 @@ describe("standalone adapter", () => {
     })
 
     {
-      const res = await fetch(`${url}/say-hello?name=James&name=jlalmes`, { method: "GET" })
+      const res = await fetch(`${url}/say-hello?name=Verc&name=James`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -701,11 +701,11 @@ describe("standalone adapter", () => {
     })
 
     {
-      const res = await fetch(`${url}/LOWER?name=James`, { method: "GET" })
+      const res = await fetch(`${url}/LOWER?name=Verc`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -713,11 +713,11 @@ describe("standalone adapter", () => {
       clearMocks()
     }
     {
-      const res = await fetch(`${url}/upper?name=James`, { method: "GET" })
+      const res = await fetch(`${url}/upper?name=Verc`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -758,11 +758,11 @@ describe("standalone adapter", () => {
     })
 
     {
-      const res = await fetch(`${url}/say-hello/James`, { method: "GET" })
+      const res = await fetch(`${url}/say-hello/Verc`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -770,15 +770,15 @@ describe("standalone adapter", () => {
       clearMocks()
     }
     {
-      const res = await fetch(`${url}/say-hello/James`, {
+      const res = await fetch(`${url}/say-hello/Verc`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: "jlalmes" })
+        body: JSON.stringify({ name: "James" })
       })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James!" })
+      expect(body).toEqual({ greeting: "Hello Verc!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -786,13 +786,13 @@ describe("standalone adapter", () => {
       clearMocks()
     }
     {
-      const res = await fetch(`${url}/say-hello/James/Berry?greeting=Hello&first=jlalmes`, {
+      const res = await fetch(`${url}/say-hello/Verc/James?greeting=Hello&first=James`, {
         method: "GET"
       })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: "Hello James Berry!" })
+      expect(body).toEqual({ greeting: "Hello Verc James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -929,11 +929,11 @@ describe("standalone adapter", () => {
       router: appRouter
     })
 
-    const res = await fetch(`${url}/echo-delete?payload=jlalmes`, { method: "DELETE" })
+    const res = await fetch(`${url}/echo-delete?payload=James`, { method: "DELETE" })
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body).toEqual({ payload: "jlalmes" })
+    expect(body).toEqual({ payload: "James" })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)
     expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -957,12 +957,12 @@ describe("standalone adapter", () => {
     const res = await fetch(`${url}/echo-post`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ payload: "jlalmes" })
+      body: JSON.stringify({ payload: "James" })
     })
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body).toEqual({ payload: "jlalmes" })
+    expect(body).toEqual({ payload: "James" })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)
     expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -1152,11 +1152,11 @@ describe("standalone adapter", () => {
       router: appRouter
     })
 
-    const res = await fetch(`${url}/multi-input?firstName=James&lastName=Berry`, { method: "GET" })
+    const res = await fetch(`${url}/multi-input?firstName=Verc&lastName=James`, { method: "GET" })
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body).toEqual({ fullName: "James Berry" })
+    expect(body).toEqual({ fullName: "Verc James" })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)
     expect(onErrorMock).toHaveBeenCalledTimes(0)

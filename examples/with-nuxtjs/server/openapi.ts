@@ -9,5 +9,5 @@ export const openApiDocument = generateOpenApiDocument(appRouter, {
   version: "1.0.0",
   baseUrl: "http://localhost:3000/api",
   docsUrl: "https://github.com/vercjames/trpc-swagger",
-  tags: ["auth", "users", "posts"],
+  tags: ["auth", "users", "posts"]
 })

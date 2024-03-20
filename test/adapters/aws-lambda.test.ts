@@ -72,7 +72,7 @@ describe("v1", () => {
         method: "GET",
         path: "hello",
         queryStringParameters: {
-          name: "James"
+          name: "Verc"
         },
         resource: "/hello"
       }),
@@ -85,7 +85,7 @@ describe("v1", () => {
       "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: "Hello James"
+      greeting: "Hello Verc"
     })
   })
 
@@ -292,7 +292,7 @@ describe("v2", () => {
         method: "GET",
         path: "hello",
         queryStringParameters: {
-          name: "James"
+          name: "Verc"
         },
         routeKey: "$default"
       }),
@@ -305,7 +305,7 @@ describe("v2", () => {
       "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: "Hello James"
+      greeting: "Hello Verc"
     })
   })
 
