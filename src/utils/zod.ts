@@ -1,5 +1,8 @@
 import { z } from "zod"
 
+// Application Sectional || Define Instances
+// =================================================================================================
+// =================================================================================================
 export const instanceofZodType = (type: any): type is z.ZodTypeAny => {
   return !!type?._def?.typeName
 }

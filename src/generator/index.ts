@@ -1,11 +1,16 @@
 import { OpenAPIV3 } from "openapi-types"
 
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { OpenApiRouter } from "../types"
 import { getOpenApiPathsObject } from "./paths"
 import { errorResponseObject } from "./schema"
-
 export const openApiVersion = "3.0.3"
 
+// Application Sectional || Define Export Type
+// =================================================================================================
+// =================================================================================================
 export type GenerateOpenApiDocumentOptions = {
   title: string;
   description?: string;
@@ -16,6 +21,9 @@ export type GenerateOpenApiDocumentOptions = {
   securitySchemes?: OpenAPIV3.ComponentsObject["securitySchemes"];
 };
 
+// Application Sectional || Define Export Handler
+// =================================================================================================
+// =================================================================================================
 export const generateOpenApiDocument = (
   appRouter: OpenApiRouter,
   opts: GenerateOpenApiDocumentOptions

@@ -1,12 +1,18 @@
 import { TRPCError } from "@trpc/server"
 import { OpenAPIV3 } from "openapi-types"
 
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { OpenApiProcedureRecord, OpenApiRouter } from "../types"
 import { acceptsRequestBody } from "../utils/method"
 import { getPathParameters, normalizePath } from "../utils/path"
 import { forEachOpenApiProcedure, getInputOutputParsers } from "../utils/procedure"
 import { getParameterObjects, getRequestBodyObject, getResponsesObject } from "./schema"
 
+// Application Sectional || Define Exports
+// =================================================================================================
+// =================================================================================================
 export const getOpenApiPathsObject = (
   appRouter: OpenApiRouter,
   securitySchemeNames: string[]

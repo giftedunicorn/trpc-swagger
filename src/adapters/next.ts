@@ -1,19 +1,25 @@
 import { TRPCError } from "@trpc/server"
 import { NextApiRequest, NextApiResponse } from "next"
 
-import { OpenApiErrorResponse, OpenApiRouter } from "../types"
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { normalizePath } from "../utils/path"
-import {
-  CreateOpenApiNodeHttpHandlerOptions,
-  createOpenApiNodeHttpHandler
-} from "./node-http/core"
+import { OpenApiErrorResponse, OpenApiRouter } from "../types"
+import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } from "./node-http/core"
 
+// Application Sectional || Define Export Type
+// =================================================================================================
+// =================================================================================================
 export type CreateOpenApiNextHandlerOptions<TRouter extends OpenApiRouter> = Omit<
   // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>,
   "maxBodySize"
 >;
 
+// Application Sectional || Define Export Handler
+// =================================================================================================
+// =================================================================================================
 export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
   opts: CreateOpenApiNextHandlerOptions<TRouter>
 ) => {

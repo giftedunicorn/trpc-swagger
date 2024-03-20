@@ -3,13 +3,16 @@ import type { NodeIncomingMessage, NodeServerResponse } from "h3"
 import { defineEventHandler, getQuery } from "h3"
 import { IncomingMessage } from "http"
 
-import { OpenApiErrorResponse, OpenApiRouter } from "../types"
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { normalizePath } from "../utils/path"
-import {
-  CreateOpenApiNodeHttpHandlerOptions,
-  createOpenApiNodeHttpHandler
-} from "./node-http/core"
+import { OpenApiErrorResponse, OpenApiRouter } from "../types"
+import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } from "./node-http/core"
 
+// Application Sectional || Define Export Type
+// =================================================================================================
+// =================================================================================================
 export type CreateOpenApiNuxtHandlerOptions<TRouter extends OpenApiRouter> = Omit<
   // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NodeIncomingMessage, NodeServerResponse>,
@@ -20,6 +23,9 @@ type NuxtRequest = IncomingMessage & {
   query?: ReturnType<typeof getQuery>;
 };
 
+// Application Sectional || Define Export Handler
+// =================================================================================================
+// =================================================================================================
 export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
   opts: CreateOpenApiNuxtHandlerOptions<TRouter>
 ) => {

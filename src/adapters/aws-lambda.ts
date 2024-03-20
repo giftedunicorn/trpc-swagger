@@ -1,32 +1,29 @@
 import { TRPCError } from "@trpc/server"
-import {
-  APIGatewayEvent,
-  AWSLambdaOptions,
-  UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
-  getHTTPMethod,
-  getPath,
-  isPayloadV1,
-  isPayloadV2,
-  transformHeaders
-} from "@trpc/server/adapters/aws-lambda"
+import { APIGatewayEvent, AWSLambdaOptions, UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE, getHTTPMethod, getPath, isPayloadV1, isPayloadV2, transformHeaders } from "@trpc/server/adapters/aws-lambda"
 import type { NodeHTTPRequest } from "@trpc/server/dist/adapters/node-http"
 import type { Context as APIGWContext } from "aws-lambda"
 import { EventEmitter } from "events"
 import type { RequestMethod } from "node-mocks-http"
 import { createRequest, createResponse } from "node-mocks-http"
 
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import type { OpenApiErrorResponse, OpenApiRouter } from "../types"
-import { createOpenApiNodeHttpHandler } from "./node-http/core"
 import { TRPC_ERROR_CODE_HTTP_STATUS, getErrorFromUnknown } from "./node-http/errors"
+import { createOpenApiNodeHttpHandler } from "./node-http/core"
 
-export type CreateOpenApiAwsLambdaHandlerOptions<
-  TRouter extends OpenApiRouter,
-  TEvent extends APIGatewayEvent,
-> = Pick<
+// Application Sectional || Define Export Type
+// =================================================================================================
+// =================================================================================================
+export type CreateOpenApiAwsLambdaHandlerOptions<TRouter extends OpenApiRouter, TEvent extends APIGatewayEvent> = Pick<
   AWSLambdaOptions<TRouter, TEvent>,
   "router" | "createContext" | "responseMeta" | "onError"
 >;
 
+// Application Sectional || Define Helper Functions
+// =================================================================================================
+// =================================================================================================
 const createMockNodeHTTPPath = (event: APIGatewayEvent) => {
   let path = getPath(event)
   if (!path.startsWith("/")) {
@@ -35,6 +32,7 @@ const createMockNodeHTTPPath = (event: APIGatewayEvent) => {
   return path
 }
 
+// VERC: Handle the request
 const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHTTPRequest => {
   const url = event.requestContext.domainName
     ? `https://${event.requestContext.domainName}${path}`
@@ -90,16 +88,17 @@ const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHT
   })
 }
 
+// VERC: Handle the response
 const createMockNodeHTTPResponse = () => {
   return createResponse({ eventEmitter: EventEmitter })
 }
 
-export const createOpenApiAwsLambdaHandler = <
-  TRouter extends OpenApiRouter,
-  TEvent extends APIGatewayEvent,
->(
-    opts: CreateOpenApiAwsLambdaHandlerOptions<TRouter, TEvent>
-  ) => {
+// Application Sectional || Define Export Handler
+// =================================================================================================
+// =================================================================================================
+export const createOpenApiAwsLambdaHandler = <TRouter extends OpenApiRouter, TEvent extends APIGatewayEvent>(
+  opts: CreateOpenApiAwsLambdaHandlerOptions<TRouter, TEvent>
+) => {
   return async (event: TEvent, context: APIGWContext) => {
     let path: string | undefined
     try {

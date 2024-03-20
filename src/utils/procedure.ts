@@ -1,9 +1,14 @@
-// eslint-disable-next-line import/no-unresolved
 import { ProcedureType } from "@trpc/server"
 import { AnyZodObject, z } from "zod"
 
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { OpenApiMeta, OpenApiProcedure, OpenApiProcedureRecord } from "../types"
 
+// Application Sectional || Define Functions
+// =================================================================================================
+// =================================================================================================
 const mergeInputs = (inputParsers: AnyZodObject[]): AnyZodObject => {
   return inputParsers.reduce((acc, inputParser) => {
     return acc.merge(inputParser)

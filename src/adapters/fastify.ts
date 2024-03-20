@@ -1,17 +1,23 @@
 import { AnyRouter } from "@trpc/server"
 import { FastifyInstance } from "fastify"
 
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { OpenApiRouter } from "../types"
-import {
-  CreateOpenApiNodeHttpHandlerOptions,
-  createOpenApiNodeHttpHandler
-} from "./node-http/core"
+import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } from "./node-http/core"
 
+// Application Sectional || Define Export Type
+// =================================================================================================
+// =================================================================================================
 export type CreateOpenApiFastifyPluginOptions<TRouter extends OpenApiRouter> =
   CreateOpenApiNodeHttpHandlerOptions<TRouter, any, any> & {
     basePath?: `/${string}`;
   };
 
+// Application Sectional || Define Export Handler
+// =================================================================================================
+// =================================================================================================
 export function fastifyTRPCOpenApiPlugin<TRouter extends AnyRouter>(
   fastify: FastifyInstance,
   opts: CreateOpenApiFastifyPluginOptions<TRouter>,

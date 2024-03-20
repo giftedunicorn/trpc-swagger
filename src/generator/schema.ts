@@ -1,25 +1,25 @@
+import { z } from "zod"
 import { TRPCError } from "@trpc/server"
 import { OpenAPIV3 } from "openapi-types"
-import { z } from "zod"
 import zodToJsonSchema from "zod-to-json-schema"
 
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
 import { OpenApiContentType } from "../types"
-import {
-  instanceofZodType,
-  instanceofZodTypeCoercible,
-  instanceofZodTypeLikeString,
-  instanceofZodTypeLikeVoid,
-  instanceofZodTypeObject,
-  instanceofZodTypeOptional,
-  unwrapZodType,
-  zodSupportsCoerce
-} from "../utils/zod"
+import { instanceofZodType, instanceofZodTypeCoercible, instanceofZodTypeLikeString, instanceofZodTypeLikeVoid, instanceofZodTypeObject, instanceofZodTypeOptional, unwrapZodType, zodSupportsCoerce } from "../utils/zod"
 
+// Application Sectional || Define Helper Functions
+// =================================================================================================
+// =================================================================================================
 const zodSchemaToOpenApiSchemaObject = (zodSchema: z.ZodType): OpenAPIV3.SchemaObject => {
   // FIXME: https://github.com/StefanTerdell/zod-to-json-schema/issues/35
   return zodToJsonSchema(zodSchema, { target: "openApi3", $refStrategy: "none" }) as any
 }
 
+// Application Sectional || Define Exports
+// =================================================================================================
+// =================================================================================================
 export const getParameterObjects = (
   schema: unknown,
   pathParameters: string[],
