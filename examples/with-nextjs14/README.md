@@ -1,26 +1,12 @@
-# Next.js + TRPC + Swagger
-This is an example project showcasing Next.js using tRPC all Wrapped in a Swagger UI for easy documentation
+# [**`trpc-swagger`**](../../README.md) (with-nextjs)
 
-## Reference Material
-This directory was creating using `npx create-next-app@latest` and selecting `typescript`
-```bash
-yarn add swagger-ui-react jsonwebtoken
-yarn add -D sass
+### Getting started
 
-```
+Make sure your current working directory is at `/trpc-swagger` root.
 
-
-## Getting Started
-First, install all local dependencies
 ```bash
 yarn install
+yarn build
+yarn run dev -w with-nextjs14
 ```
-```bash
-yarn start
-```
-
-## Local Development
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
 
