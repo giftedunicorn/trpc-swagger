@@ -1,13 +1,11 @@
-import { Procedure, ProcedureParams, Router } from "@trpc/server"
-import type { RootConfig } from "@trpc/server/dist/core/internals/config"
 import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc"
-import type { RouterDef } from "@trpc/server/src/core/router"
 import { OpenAPIV3 } from "openapi-types"
 import { ZodIssue } from "zod"
-
 export type OpenApiMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
-
-type TRPCMeta = Record<string, unknown>;
+export type TRPCMeta = Record<string, unknown>;
+import { Procedure, ProcedureParams, Router } from "@trpc/server"
+import type { RouterDef } from "@trpc/server/src/core/router"
+import type { RootConfig } from "@trpc/server/dist/core/internals/config"
 
 export type OpenApiContentType =
   | "application/json"

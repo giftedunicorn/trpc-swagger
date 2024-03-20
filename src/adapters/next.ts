@@ -9,6 +9,7 @@ import {
 } from "./node-http/core"
 
 export type CreateOpenApiNextHandlerOptions<TRouter extends OpenApiRouter> = Omit<
+  // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>,
   "maxBodySize"
 >;

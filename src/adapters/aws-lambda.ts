@@ -109,7 +109,6 @@ export const createOpenApiAwsLambdaHandler = <
           code: "INTERNAL_SERVER_ERROR"
         })
       }
-
       const createContext = async () => opts.createContext?.({ event, context })
       const openApiHttpHandler = createOpenApiNodeHttpHandler({ ...opts, createContext } as any)
 
@@ -117,6 +116,7 @@ export const createOpenApiAwsLambdaHandler = <
       const req = createMockNodeHTTPRequest(path, event)
       const res = createMockNodeHTTPResponse()
 
+      // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
       await openApiHttpHandler(req, res)
 
       return {

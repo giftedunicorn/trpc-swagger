@@ -7,6 +7,7 @@ import {
 } from "./node-http/core"
 
 export type CreateOpenApiExpressMiddlewareOptions<TRouter extends OpenApiRouter> =
+  // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
   CreateOpenApiNodeHttpHandlerOptions<TRouter, Request, Response>;
 
 export const createOpenApiExpressMiddleware = <TRouter extends OpenApiRouter>(

@@ -7,6 +7,7 @@ import {
 } from "./node-http/core"
 
 export type CreateOpenApiHttpHandlerOptions<TRouter extends OpenApiRouter> =
+// @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
   CreateOpenApiNodeHttpHandlerOptions<TRouter, IncomingMessage, ServerResponse>;
 
 export const createOpenApiHttpHandler = <TRouter extends OpenApiRouter>(

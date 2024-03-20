@@ -11,6 +11,7 @@ import {
 } from "./node-http/core"
 
 export type CreateOpenApiNuxtHandlerOptions<TRouter extends OpenApiRouter> = Omit<
+  // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NodeIncomingMessage, NodeServerResponse>,
   "maxBodySize"
 >;
