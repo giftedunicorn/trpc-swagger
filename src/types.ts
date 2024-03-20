@@ -1,17 +1,17 @@
-import { Procedure, ProcedureParams, Router } from '@trpc/server';
-import type { RootConfig } from '@trpc/server/dist/core/internals/config';
-import { TRPC_ERROR_CODE_KEY } from '@trpc/server/rpc';
-import type { RouterDef } from '@trpc/server/src/core/router';
-import { OpenAPIV3 } from 'openapi-types';
-import { ZodIssue } from 'zod';
+import { Procedure, ProcedureParams, Router } from "@trpc/server"
+import type { RootConfig } from "@trpc/server/dist/core/internals/config"
+import { TRPC_ERROR_CODE_KEY } from "@trpc/server/rpc"
+import type { RouterDef } from "@trpc/server/src/core/router"
+import { OpenAPIV3 } from "openapi-types"
+import { ZodIssue } from "zod"
 
-export type OpenApiMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE';
+export type OpenApiMethod = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
 
 type TRPCMeta = Record<string, unknown>;
 
 export type OpenApiContentType =
-  | 'application/json'
-  | 'application/x-www-form-urlencoded'
+  | "application/json"
+  | "application/x-www-form-urlencoded"
   // eslint-disable-next-line @typescript-eslint/ban-types
   | (string & {});
 
@@ -24,7 +24,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
     description?: string;
     protect?: boolean;
     tags?: string[];
-    headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: 'header' })[];
+    headers?: (OpenAPIV3.ParameterBaseObject & { name: string; in?: "header" })[];
     contentTypes?: OpenApiContentType[];
     deprecated?: boolean;
     example?: {
@@ -36,7 +36,7 @@ export type OpenApiMeta<TMeta = TRPCMeta> = TMeta & {
 };
 
 export type OpenApiProcedure<TMeta = TRPCMeta> = Procedure<
-  'query' | 'mutation',
+  "query" | "mutation",
   ProcedureParams<
     RootConfig<{
       transformer: any;

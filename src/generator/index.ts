@@ -1,10 +1,10 @@
-import { OpenAPIV3 } from 'openapi-types';
+import { OpenAPIV3 } from "openapi-types"
 
-import { OpenApiRouter } from '../types';
-import { getOpenApiPathsObject } from './paths';
-import { errorResponseObject } from './schema';
+import { OpenApiRouter } from "../types"
+import { getOpenApiPathsObject } from "./paths"
+import { errorResponseObject } from "./schema"
 
-export const openApiVersion = '3.0.3';
+export const openApiVersion = "3.0.3"
 
 export type GenerateOpenApiDocumentOptions = {
   title: string;
@@ -13,39 +13,39 @@ export type GenerateOpenApiDocumentOptions = {
   baseUrl: string;
   docsUrl?: string;
   tags?: string[];
-  securitySchemes?: OpenAPIV3.ComponentsObject['securitySchemes'];
+  securitySchemes?: OpenAPIV3.ComponentsObject["securitySchemes"];
 };
 
 export const generateOpenApiDocument = (
   appRouter: OpenApiRouter,
-  opts: GenerateOpenApiDocumentOptions,
+  opts: GenerateOpenApiDocumentOptions
 ): OpenAPIV3.Document => {
   const securitySchemes = opts.securitySchemes || {
     Authorization: {
-      type: 'http',
-      scheme: 'bearer',
-    },
-  };
+      type: "http",
+      scheme: "bearer"
+    }
+  }
   return {
     openapi: openApiVersion,
     info: {
       title: opts.title,
       description: opts.description,
-      version: opts.version,
+      version: opts.version
     },
     servers: [
       {
-        url: opts.baseUrl,
-      },
+        url: opts.baseUrl
+      }
     ],
     paths: getOpenApiPathsObject(appRouter, Object.keys(securitySchemes)),
     components: {
       securitySchemes,
       responses: {
-        error: errorResponseObject,
-      },
+        error: errorResponseObject
+      }
     },
     tags: opts.tags?.map((tag) => ({ name: tag })),
-    externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined,
-  };
-};
+    externalDocs: opts.docsUrl ? { url: opts.docsUrl } : undefined
+  }
+}

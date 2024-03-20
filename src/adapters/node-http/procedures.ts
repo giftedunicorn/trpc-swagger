@@ -1,6 +1,6 @@
-import { OpenApiMethod, OpenApiProcedure, OpenApiRouter } from '../../types';
-import { getPathRegExp, normalizePath } from '../../utils/path';
-import { forEachOpenApiProcedure } from '../../utils/procedure';
+import { OpenApiMethod, OpenApiProcedure, OpenApiRouter } from "../../types"
+import { getPathRegExp, normalizePath } from "../../utils/path"
+import { forEachOpenApiProcedure } from "../../utils/procedure"
 
 export const createProcedureCache = (router: OpenApiRouter) => {
   const procedureCache = new Map<
@@ -8,57 +8,57 @@ export const createProcedureCache = (router: OpenApiRouter) => {
     Map<
       RegExp,
       {
-        type: 'query' | 'mutation';
+        type: "query" | "mutation";
         path: string;
         procedure: OpenApiProcedure;
       }
     >
-  >();
+  >()
 
-  const { queries, mutations } = router._def;
+  const { queries, mutations } = router._def
 
   forEachOpenApiProcedure(queries, ({ path: queryPath, procedure, openapi }) => {
-    const { method } = openapi;
+    const { method } = openapi
     if (!procedureCache.has(method)) {
-      procedureCache.set(method, new Map());
+      procedureCache.set(method, new Map())
     }
-    const path = normalizePath(openapi.path);
-    const pathRegExp = getPathRegExp(path);
+    const path = normalizePath(openapi.path)
+    const pathRegExp = getPathRegExp(path)
     procedureCache.get(method)!.set(pathRegExp, {
-      type: 'query',
+      type: "query",
       path: queryPath,
-      procedure,
-    });
-  });
+      procedure
+    })
+  })
 
   forEachOpenApiProcedure(mutations, ({ path: mutationPath, procedure, openapi }) => {
-    const { method } = openapi;
+    const { method } = openapi
     if (!procedureCache.has(method)) {
-      procedureCache.set(method, new Map());
+      procedureCache.set(method, new Map())
     }
-    const path = normalizePath(openapi.path);
-    const pathRegExp = getPathRegExp(path);
+    const path = normalizePath(openapi.path)
+    const pathRegExp = getPathRegExp(path)
     procedureCache.get(method)!.set(pathRegExp, {
-      type: 'mutation',
+      type: "mutation",
       path: mutationPath,
-      procedure,
-    });
-  });
+      procedure
+    })
+  })
 
   return (method: OpenApiMethod, path: string) => {
-    const procedureMethodCache = procedureCache.get(method);
+    const procedureMethodCache = procedureCache.get(method)
     if (!procedureMethodCache) {
-      return undefined;
+      return undefined
     }
 
-    const procedureRegExp = Array.from(procedureMethodCache.keys()).find((re) => re.test(path));
+    const procedureRegExp = Array.from(procedureMethodCache.keys()).find((re) => re.test(path))
     if (!procedureRegExp) {
-      return undefined;
+      return undefined
     }
 
-    const procedure = procedureMethodCache.get(procedureRegExp)!;
-    const pathInput = procedureRegExp.exec(path)?.groups ?? {};
+    const procedure = procedureMethodCache.get(procedureRegExp)!
+    const pathInput = procedureRegExp.exec(path)?.groups ?? {}
 
-    return { procedure, pathInput };
-  };
-};
+    return { procedure, pathInput }
+  }
+}

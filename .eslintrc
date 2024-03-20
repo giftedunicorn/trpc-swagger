@@ -32,9 +32,10 @@
     "keyword-spacing": ["error", { "before": true, "after": true }],
     "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
     "@typescript-eslint/no-misused-promises": ["error", { "checksVoidReturn": false }],
-    "@typescript-eslint/no-unsafe-return": "off",// VERC: changed warn -> off,
+    "@typescript-eslint/no-unsafe-return": "off",// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-argument": "off",// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-assignment": "off",  // VERC: changed warn -> off
+    "@typescript-eslint/no-non-null-assertion": "off", /// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-member-access": "off", // VERC: changed warn -> off
     "@typescript-eslint/no-redundant-type-constituents": "off",
     "@typescript-eslint/no-explicit-any": "off",// VERC: Added to pass legacy intigrations

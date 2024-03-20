@@ -1,11 +1,11 @@
-import { AnyRouter } from '@trpc/server';
-import { FastifyInstance } from 'fastify';
+import { AnyRouter } from "@trpc/server"
+import { FastifyInstance } from "fastify"
 
-import { OpenApiRouter } from '../types';
+import { OpenApiRouter } from "../types"
 import {
   CreateOpenApiNodeHttpHandlerOptions,
-  createOpenApiNodeHttpHandler,
-} from './node-http/core';
+  createOpenApiNodeHttpHandler
+} from "./node-http/core"
 
 export type CreateOpenApiFastifyPluginOptions<TRouter extends OpenApiRouter> =
   CreateOpenApiNodeHttpHandlerOptions<TRouter, any, any> & {
@@ -15,35 +15,35 @@ export type CreateOpenApiFastifyPluginOptions<TRouter extends OpenApiRouter> =
 export function fastifyTRPCOpenApiPlugin<TRouter extends AnyRouter>(
   fastify: FastifyInstance,
   opts: CreateOpenApiFastifyPluginOptions<TRouter>,
-  done: (err?: Error) => void,
+  done: (err?: Error) => void
 ) {
-  let prefix = opts.basePath ?? '';
+  let prefix = opts.basePath ?? ""
 
   // if prefix ends with a slash, remove it
-  if (prefix.endsWith('/')) {
-    prefix = prefix.slice(0, -1);
+  if (prefix.endsWith("/")) {
+    prefix = prefix.slice(0, -1)
   }
 
-  const openApiHttpHandler = createOpenApiNodeHttpHandler(opts);
+  const openApiHttpHandler = createOpenApiNodeHttpHandler(opts)
 
   fastify.all(`${prefix}/*`, async (request, reply) => {
-    const prefixRemovedFromUrl = request.url.replace(fastify.prefix, '').replace(prefix, '');
-    request.raw.url = prefixRemovedFromUrl;
+    const prefixRemovedFromUrl = request.url.replace(fastify.prefix, "").replace(prefix, "")
+    request.raw.url = prefixRemovedFromUrl
     return await openApiHttpHandler(
       request,
       Object.assign(reply, {
         setHeader: (key: string, value: string | number | readonly string[]) => {
           if (Array.isArray(value)) {
-            value.forEach((v) => reply.header(key, v));
-            return reply;
+            value.forEach((v) => reply.header(key, v))
+            return reply
           }
 
-          return reply.header(key, value);
+          return reply.header(key, value)
         },
-        end: (body: any) => reply.send(body), // eslint-disable-line @typescript-eslint/no-explicit-any
-      }),
-    );
-  });
+        end: (body: any) => reply.send(body) // eslint-disable-line @typescript-eslint/no-explicit-any
+      })
+    )
+  })
 
-  done();
+  done()
 }

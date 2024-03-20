@@ -10,22 +10,22 @@ import {
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
   createOpenApiNuxtHandler,
-  fastifyTRPCOpenApiPlugin,
-} from './adapters';
+  fastifyTRPCOpenApiPlugin
+} from "./adapters"
 import {
   GenerateOpenApiDocumentOptions,
   generateOpenApiDocument,
-  openApiVersion,
-} from './generator';
+  openApiVersion
+} from "./generator"
 import {
   OpenApiErrorResponse,
   OpenApiMeta,
   OpenApiMethod,
   OpenApiResponse,
   OpenApiRouter,
-  OpenApiSuccessResponse,
-} from './types';
-import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
+  OpenApiSuccessResponse
+} from "./types"
+import { ZodTypeLikeString, ZodTypeLikeVoid } from "./utils/zod"
 
 export {
   CreateOpenApiAwsLambdaHandlerOptions,
@@ -50,5 +50,5 @@ export {
   OpenApiSuccessResponse,
   OpenApiErrorResponse,
   ZodTypeLikeString,
-  ZodTypeLikeVoid,
-};
+  ZodTypeLikeVoid
+}
