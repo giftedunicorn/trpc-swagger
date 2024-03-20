@@ -1,25 +1,29 @@
-import { inferAsyncReturnType, initTRPC } from '@trpc/server'
-import {
-  CreateAWSLambdaContextOptions,
-  UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
-} from '@trpc/server/adapters/aws-lambda'
-import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from 'aws-lambda'
-import z from 'zod'
+import z from "zod"
+import { inferAsyncReturnType, initTRPC } from "@trpc/server"
+import { CreateAWSLambdaContextOptions, UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE } from "@trpc/server/adapters/aws-lambda"
+import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda"
 
-import { OpenApiMeta, createOpenApiAwsLambdaHandler } from '../../src'
-import {
-  mockAPIGatewayContext,
-  mockAPIGatewayProxyEventV1,
-  mockAPIGatewayProxyEventV2,
-} from './aws-lambda.utils'
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
+import { OpenApiMeta, createOpenApiAwsLambdaHandler } from "../../src"
+import { mockAPIGatewayContext, mockAPIGatewayProxyEventV1, mockAPIGatewayProxyEventV2 } from "./aws-lambda.utils"
+
+// Application Sectional || Define Constants
+// =================================================================================================
+// =================================================================================================
+const ctx = mockAPIGatewayContext()
 
 const createContextV1 = ({ event }: CreateAWSLambdaContextOptions<APIGatewayProxyEvent>) => {
-  return { user: event.headers['X-USER'] }
+  return { user: event.headers["X-USER"] }
 }
 const createContextV2 = ({ event }: CreateAWSLambdaContextOptions<APIGatewayProxyEventV2>) => {
-  return { user: event.headers['X-USER'] }
+  return { user: event.headers["X-USER"] }
 }
 
+// Application Sectional || Define Router
+// =================================================================================================
+// =================================================================================================
 const createRouter = (createContext: (obj: any) => { user?: string }) => {
   const t = initTRPC
     .context<inferAsyncReturnType<typeof createContext>>()
@@ -28,460 +32,461 @@ const createRouter = (createContext: (obj: any) => { user?: string }) => {
 
   return t.router({
     getHello: t.procedure
-      .meta({ openapi: { path: '/hello', method: 'GET' } })
+      .meta({ openapi: { path: "/hello", method: "GET" } })
       .input(z.object({ name: z.string().optional() }))
       .output(z.object({ greeting: z.string() }))
       .query(({ input, ctx }) => ({
-        greeting: `Hello ${ctx.user ?? input.name ?? 'world'}`,
+        greeting: `Hello ${ctx.user ?? input.name ?? "world"}`
       })),
     postHello: t.procedure
-      .meta({ openapi: { path: '/hello', method: 'POST' } })
+      .meta({ openapi: { path: "/hello", method: "POST" } })
       .input(z.object({ name: z.string() }))
       .output(z.object({ greeting: z.string() }))
       .mutation(({ input, ctx }) => ({
-        greeting: `Hello ${ctx.user ?? input.name}`,
-      })),
+        greeting: `Hello ${ctx.user ?? input.name}`
+      }))
   })
 }
 
-const ctx = mockAPIGatewayContext()
-
-describe('v1', () => {
+// Application Sectional || Define Test Scripts
+// =================================================================================================
+// =================================================================================================
+describe("v1", () => {
   const routerV1 = createRouter(createContextV1)
   const handler = createOpenApiAwsLambdaHandler({
     router: routerV1,
-    createContext: createContextV1,
+    createContext: createContextV1
   })
 
-  test('with query input', async () => {
+  test("with query input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV1({
-        body: '',
+        body: "",
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'GET',
-        path: 'hello',
+        method: "GET",
+        path: "hello",
         queryStringParameters: {
-          name: 'James',
+          name: "James"
         },
-        resource: '/hello',
+        resource: "/hello"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello James',
+      greeting: "Hello James"
     })
   })
 
-  test('with JSON body input', async () => {
+  test("with JSON body input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV1({
         body: JSON.stringify({
-          name: 'Aphex',
+          name: "Aphex"
         }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        resource: '/hello',
+        resource: "/hello"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello Aphex',
+      greeting: "Hello Aphex"
     })
   })
 
-  test('with url encoded body input', async () => {
+  test("with url encoded body input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV1({
-        body: 'name=Aphex',
+        body: "name=Aphex",
         headers: {
-          'content-type': 'application/x-www-form-urlencoded',
+          "content-type": "application/x-www-form-urlencoded"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        resource: '/hello',
+        resource: "/hello"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello Aphex',
+      greeting: "Hello Aphex"
     })
   })
 
-  test('with context', async () => {
+  test("with context", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV1({
-        body: '',
+        body: "",
         headers: {
-          'content-type': 'application/json',
-          'X-USER': 'Twin',
+          "content-type": "application/json",
+          "X-USER": "Twin"
         },
-        method: 'GET',
-        path: 'hello',
+        method: "GET",
+        path: "hello",
         queryStringParameters: {},
-        resource: '/hello',
+        resource: "/hello"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello Twin',
+      greeting: "Hello Twin"
     })
   })
 
-  test('with bad input', async () => {
+  test("with bad input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV1({
         body: JSON.stringify({}),
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        resource: '/hello',
+        resource: "/hello"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(400)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      message: 'Input validation failed',
-      code: 'BAD_REQUEST',
+      message: "Input validation failed",
+      code: "BAD_REQUEST",
       issues: [
         {
-          code: 'invalid_type',
-          expected: 'string',
-          message: 'Required',
-          path: ['name'],
-          received: 'undefined',
-        },
-      ],
+          code: "invalid_type",
+          expected: "string",
+          message: "Required",
+          path: ["name"],
+          received: "undefined"
+        }
+      ]
     })
   })
 
-  test('with invalid body', async () => {
+  test("with invalid body", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV1({
-        body: 'asdfasd',
+        body: "asdfasd",
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        resource: '/hello',
+        resource: "/hello"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(400)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      message: 'Failed to parse request body',
-      code: 'PARSE_ERROR',
+      message: "Failed to parse request body",
+      code: "PARSE_ERROR"
     })
   })
 
-  test('with bad event', async () => {
+  test("with bad event", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       // @ts-expect-error - invalid event
-      { version: 'asdf' },
-      ctx,
+      { version: "asdf" },
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(500)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
       message: UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
-      code: 'INTERNAL_SERVER_ERROR',
+      code: "INTERNAL_SERVER_ERROR"
     })
   })
 })
 
-describe('v2', () => {
+describe("v2", () => {
   const router = createRouter(createContextV2)
   const handler = createOpenApiAwsLambdaHandler({
     router,
-    createContext: createContextV2,
+    createContext: createContextV2
   })
 
-  test('with query input', async () => {
+  test("with query input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV2({
-        body: '',
+        body: "",
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'GET',
-        path: 'hello',
+        method: "GET",
+        path: "hello",
         queryStringParameters: {
-          name: 'James',
+          name: "James"
         },
-        routeKey: '$default',
+        routeKey: "$default"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello James',
+      greeting: "Hello James"
     })
   })
 
-  test('with JSON body input', async () => {
+  test("with JSON body input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV2({
         body: JSON.stringify({
-          name: 'Aphex',
+          name: "Aphex"
         }),
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        routeKey: '$default',
+        routeKey: "$default"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello Aphex',
+      greeting: "Hello Aphex"
     })
   })
 
-  test('with url encoded body input', async () => {
+  test("with url encoded body input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV2({
-        body: 'name=Aphex',
+        body: "name=Aphex",
         headers: {
-          'content-type': 'application/x-www-form-urlencoded',
+          "content-type": "application/x-www-form-urlencoded"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        routeKey: '$default',
+        routeKey: "$default"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello Aphex',
+      greeting: "Hello Aphex"
     })
   })
 
-  test('with context', async () => {
+  test("with context", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV2({
-        body: '',
+        body: "",
         headers: {
-          'content-type': 'application/json',
-          'X-USER': 'Twin',
+          "content-type": "application/json",
+          "X-USER": "Twin"
         },
-        method: 'GET',
-        path: 'hello',
+        method: "GET",
+        path: "hello",
         queryStringParameters: {},
-        routeKey: '$default',
+        routeKey: "$default"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(200)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      greeting: 'Hello Twin',
+      greeting: "Hello Twin"
     })
   })
 
-  test('with bad input', async () => {
+  test("with bad input", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV2({
         body: JSON.stringify({}),
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        routeKey: '$default',
+        routeKey: "$default"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(400)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      message: 'Input validation failed',
-      code: 'BAD_REQUEST',
+      message: "Input validation failed",
+      code: "BAD_REQUEST",
       issues: [
         {
-          code: 'invalid_type',
-          expected: 'string',
-          message: 'Required',
-          path: ['name'],
-          received: 'undefined',
-        },
-      ],
+          code: "invalid_type",
+          expected: "string",
+          message: "Required",
+          path: ["name"],
+          received: "undefined"
+        }
+      ]
     })
   })
 
-  test('with invalid body', async () => {
+  test("with invalid body", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       mockAPIGatewayProxyEventV2({
-        body: 'asdfasd',
+        body: "asdfasd",
         headers: {
-          'content-type': 'application/json',
+          "content-type": "application/json"
         },
-        method: 'POST',
-        path: 'hello',
+        method: "POST",
+        path: "hello",
         queryStringParameters: {},
-        routeKey: '$default',
+        routeKey: "$default"
       }),
-      ctx,
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(400)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
-      message: 'Failed to parse request body',
-      code: 'PARSE_ERROR',
+      message: "Failed to parse request body",
+      code: "PARSE_ERROR"
     })
   })
 
-  test('with bad event', async () => {
+  test("with bad event", async () => {
     const {
       statusCode,
       headers,
-      body: rawBody,
+      body: rawBody
     } = await handler(
       // @ts-expect-error - invalid event
-      { version: 'asdf' },
-      ctx,
+      { version: "asdf" },
+      ctx
     )
     const body = JSON.parse(rawBody)
 
     expect(statusCode).toBe(500)
     expect(headers).toEqual({
-      'content-type': 'application/json',
+      "content-type": "application/json"
     })
     expect(body).toEqual({
       message: UNKNOWN_PAYLOAD_FORMAT_VERSION_ERROR_MESSAGE,
-      code: 'INTERNAL_SERVER_ERROR',
+      code: "INTERNAL_SERVER_ERROR"
     })
   })
 })

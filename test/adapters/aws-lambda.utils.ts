@@ -1,10 +1,8 @@
-import type {
-  APIGatewayProxyEvent,
-  APIGatewayProxyEventPathParameters,
-  APIGatewayProxyEventV2,
-  Context,
-} from 'aws-lambda'
+import type { APIGatewayProxyEvent, APIGatewayProxyEventPathParameters, APIGatewayProxyEventV2, Context } from "aws-lambda"
 
+// Application Sectional || Proxy Event 1
+// =================================================================================================
+// =================================================================================================
 export const mockAPIGatewayProxyEventV1 = ({
   body,
   headers,
@@ -12,15 +10,15 @@ export const mockAPIGatewayProxyEventV1 = ({
   queryStringParameters,
   method,
   resource,
-  pathParameters,
+  pathParameters
 }: {
-  body: string
-  headers: { [key: string]: string }
-  queryStringParameters: Record<string, string>
-  path: string
-  method: string
-  resource: string
-  pathParameters?: APIGatewayProxyEventPathParameters
+  body: string;
+  headers: { [key: string]: string };
+  queryStringParameters: Record<string, string>;
+  path: string;
+  method: string;
+  resource: string;
+  pathParameters?: APIGatewayProxyEventPathParameters;
 }): APIGatewayProxyEvent => {
   return {
     body,
@@ -35,16 +33,16 @@ export const mockAPIGatewayProxyEventV1 = ({
     pathParameters: pathParameters || null,
     stageVariables: {},
     requestContext: {
-      accountId: 'mock',
-      apiId: 'mock',
-      path: 'mock',
-      protocol: 'mock',
+      accountId: "mock",
+      apiId: "mock",
+      path: "mock",
+      protocol: "mock",
       httpMethod: method,
-      stage: 'mock',
-      requestId: 'mock',
+      stage: "mock",
+      requestId: "mock",
       requestTimeEpoch: 123,
-      resourceId: 'mock',
-      resourcePath: 'mock',
+      resourceId: "mock",
+      resourcePath: "mock",
       identity: {
         accessKey: null,
         accountId: null,
@@ -57,16 +55,19 @@ export const mockAPIGatewayProxyEventV1 = ({
         cognitoIdentityId: null,
         cognitoIdentityPoolId: null,
         principalOrgId: null,
-        sourceIp: 'mock',
+        sourceIp: "mock",
         user: null,
         userAgent: null,
-        userArn: null,
+        userArn: null
       },
-      authorizer: {},
-    },
+      authorizer: {}
+    }
   }
 }
 
+// Application Sectional || Proxy Event 2
+// =================================================================================================
+// =================================================================================================
 export const mockAPIGatewayProxyEventV2 = ({
   body,
   headers,
@@ -74,18 +75,18 @@ export const mockAPIGatewayProxyEventV2 = ({
   queryStringParameters,
   method,
   routeKey,
-  pathParameters,
+  pathParameters
 }: {
-  body: string
-  headers: { [key: string]: string }
-  queryStringParameters: Record<string, string>
-  path: string
-  method: string
-  routeKey: string
-  pathParameters?: { [key: string]: string }
+  body: string;
+  headers: { [key: string]: string };
+  queryStringParameters: Record<string, string>;
+  path: string;
+  method: string;
+  routeKey: string;
+  pathParameters?: { [key: string]: string };
 }): APIGatewayProxyEventV2 => {
   return {
-    version: '2.0',
+    version: "2.0",
     routeKey,
     rawQueryString: path,
     body,
@@ -96,42 +97,42 @@ export const mockAPIGatewayProxyEventV2 = ({
     queryStringParameters: queryStringParameters,
     stageVariables: {},
     requestContext: {
-      accountId: 'mock',
-      apiId: 'mock',
-      stage: 'mock',
-      requestId: 'mock',
-      domainName: 'mock',
-      domainPrefix: 'mock',
+      accountId: "mock",
+      apiId: "mock",
+      stage: "mock",
+      requestId: "mock",
+      domainName: "mock",
+      domainPrefix: "mock",
       http: {
         method: method,
-        path: 'mock',
-        protocol: 'mock',
-        sourceIp: 'mock',
-        userAgent: 'mock',
+        path: "mock",
+        protocol: "mock",
+        sourceIp: "mock",
+        userAgent: "mock"
       },
       routeKey,
-      time: 'mock',
-      timeEpoch: 0,
-    },
+      time: "mock",
+      timeEpoch: 0
+    }
   }
 }
 
 export const mockAPIGatewayContext = (): Context => {
   return {
-    functionName: 'mock',
+    functionName: "mock",
     callbackWaitsForEmptyEventLoop: true,
-    functionVersion: 'mock',
-    invokedFunctionArn: 'mock',
-    memoryLimitInMB: 'mock',
-    awsRequestId: 'mock',
-    logGroupName: 'mock',
-    logStreamName: 'mock',
+    functionVersion: "mock",
+    invokedFunctionArn: "mock",
+    memoryLimitInMB: "mock",
+    awsRequestId: "mock",
+    logGroupName: "mock",
+    logStreamName: "mock",
     getRemainingTimeInMillis: () => -1,
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     done: () => {},
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     fail: () => {},
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    succeed: () => {},
+    succeed: () => {}
   }
 }

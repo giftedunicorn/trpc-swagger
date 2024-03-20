@@ -1,78 +1,121 @@
-![trpc-openapi](assets/trpc-openapi-readme.png)
+![trpc-swagger](assets/trpc-swagger-readme.png)
 
 <div align="center">
-  <h1>trpc-openapi</h1>
-  <a href="https://www.npmjs.com/package/trpc-openapi"><img src="https://img.shields.io/npm/v/trpc-openapi.svg?style=flat&color=brightgreen" target="_blank" /></a>
+  <h1>trpc-swagger</h1>
+  <a href="https://www.npmjs.com/package/trpc-swagger"><img src="https://img.shields.io/npm/v/trpc-swagger.svg?style=flat&color=brightgreen" target="_blank" /></a>
   <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" /></a>
   <a href="https://trpc.io/discord" target="_blank"><img src="https://img.shields.io/badge/chat-discord-blue.svg" /></a>
   <br />
   <hr />
 </div>
 
-## **[OpenAPI](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
+## **[Swagger](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
 
 - Easy REST endpoints for your tRPC procedures.
 - Perfect for incremental adoption.
 - OpenAPI version 3.0.3.
 
+## Fork Notice
+The original repo [trpc-openapi](https://github.com/jlalmes/trpc-openapi) no longer appears to be maintained. 
+The goal of this fork is to add more control for error responses, support more frameworks, and support the new procedure types in @trpc v11.x.x.
+PRs Are welcome
+
 ## Usage
 
-**1. Install `trpc-openapi`.**
+**1. Install `trpc-swagger`**
 
 ```bash
-# npm
-npm install trpc-openapi
-# yarn
-yarn add trpc-openapi
+npm install trpc-swagger --save
+```
+```bash
+yarn add trpc-swagger
+```
+```bash
+pnpm add trpc-swagger
+```
+```bash
+bun add trpc-swagger
 ```
 
-**2. Add `OpenApiMeta` to your tRPC instance.**
+**2. Example Project Tree**
+
+    .
+    ├── @ // project root       # 
+    │   ├── package.json        #
+    │   ├── server              # 
+    │   |   ├── index.ts        # 
+    │   |   ├── client.ts       # 
+    │   |   ├── swagger.ts      #
+    │   |   ├── trpc.ts         #
+    │   |   └── ...             # etc.
+    │   └── ...                 # etc.
+    └── ...                     # etc.
+
+
+**3. Add `OpenApiMeta` to your tRPC instance**
+
 
 ```typescript
+// @/server/trpc.ts
 import { initTRPC } from '@trpc/server'
-import { OpenApiMeta } from 'trpc-openapi'
+import { OpenApiMeta } from 'trpc-swagger'
 
-const t = initTRPC.meta<OpenApiMeta>().create() /* 👈 */
+// VERC: This
+const t = initTRPC.create()
+
+// VERC: Becomes
+const t = initTRPC.meta<OpenApiMeta>().create()
+
+// VERC: Advanced create configs
+const t = initTRPC.meta<OpenApiMeta>().create({ ... })
 ```
 
-**3. Enable `openapi` support for a procedure.**
+**4. Enable `openapi` support for a procedure.**
+
 
 ```typescript
+// @/server/index.ts
 export const appRouter = t.router({
   sayHello: t.procedure
-    .meta({ /* 👉 */ openapi: { method: 'GET', path: '/say-hello' } })
-    .input(z.object({ name: z.string() }))
-    .output(z.object({ greeting: z.string() }))
+    .meta({ 
+      openapi: { method: 'GET', path: '/say-hello' } 
+    })
+    .input(z.object({ 
+      name: z.string() 
+    }))
+    .output(z.object({ 
+      greeting: z.string() 
+    }))
     .query(({ input }) => {
       return { greeting: `Hello ${input.name}!` }
     })
 })
 ```
 
-**4. Generate an OpenAPI document.**
+**5. Generate an OpenAPI document.**
 
 ```typescript
-import { generateOpenApiDocument } from 'trpc-openapi'
-
-import { appRouter } from '../appRouter'
+// @/server/swagger.ts
+import { generateOpenApiDocument } from 'trpc-swagger'
+import { appRouter } from './appRouter'
 
 /* 👇 */
 export const openApiDocument = generateOpenApiDocument(appRouter, {
-  title: 'tRPC OpenAPI',
-  version: '1.0.0',
-  baseUrl: 'http://localhost:3000',
+  title: 'tRPC Swagger',
+  version: '1.0.0', // consider making this pull version from package.json
+  baseUrl: 'http://localhost:3000', // consider making this dynamic
+  docsUrl: "https://github.com/vercjames/trpc-swagger",
+  tags: ["tag1", "tag2", "tag3", "posts"],
 })
 ```
 
-**5. Add an `trpc-openapi` handler to your app.**
+**5. Add an `trpc-swagger` handler to your app.**
 
-We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
-
-[`Fetch`](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API), [`Cloudflare Workers`](https://workers.cloudflare.com/) & more soon™, PRs are welcomed 🙌.
+We currently support adapters for [`Express`](http://expressjs.com/), [`Next.js`](https://nextjs.org/),  [`Next.js 14`](https://nextjs.org/), [`Serverless`](https://www.serverless.com/), [`Fastify`](https://www.fastify.io/), [`Nuxt`](https://nuxtjs.org/) & [`Node:HTTP`](https://nodejs.org/api/http.html).
 
 ```typescript
 import http from 'http'
-import { createOpenApiHttpHandler } from 'trpc-openapi'
+import { createOpenApiHttpHandler } from 'trpc-swagger'
 
 import { appRouter } from '../appRouter'
 
@@ -91,10 +134,14 @@ const body = await res.json() /* { greeting: 'Hello James!' } */
 
 ## Requirements
 
-Peer dependencies:
+**Peer dependencies**
 
-- [`tRPC`](https://github.com/trpc/trpc) Server v10 (`@trpc/server`) must be installed.
+Your application requires these 2 packages installed
+- [`tRPC`](https://github.com/trpc/trpc) Server v11 (`@trpc/server`) must be installed.
 - [`Zod`](https://github.com/colinhacks/zod) v3 (`zod@^3.14.4`) must be installed (recommended `^3.20.0`).
+
+
+**Procedure support**
 
 For a procedure to support OpenAPI the following _must_ be true:
 
@@ -177,7 +224,6 @@ You can modify the status code or headers for any response using the `responseMe
 
 ```typescript
 // Router
-
 export const appRouter = t.router({
   sayHello: t.procedure
     .meta({ openapi: {
@@ -211,9 +257,9 @@ Explore a [complete example here](examples/with-nextjs/src/server/router.ts).
 
 ```typescript
 import { TRPCError, initTRPC } from '@trpc/server'
-import { OpenApiMeta } from 'trpc-openapi'
+import { OpenApiMeta } from 'trpc-swagger'
 
-type User = { id: string name: string }
+type User = { id: string, name: string }
 
 const users: User[] = [
   {
@@ -270,7 +316,7 @@ Please see [full example here](examples/with-express).
 ```typescript
 import { createExpressMiddleware } from '@trpc/server/adapters/express'
 import express from 'express'
-import { createOpenApiExpressMiddleware } from 'trpc-openapi'
+import { createOpenApiExpressMiddleware } from 'trpc-swagger'
 
 import { appRouter } from '../appRouter'
 
@@ -288,7 +334,7 @@ Please see [full example here](examples/with-nextjs).
 
 ```typescript
 // pages/api/[...trpc].ts
-import { createOpenApiNextHandler } from 'trpc-openapi'
+import { createOpenApiNextHandler } from 'trpc-swagger'
 
 import { appRouter } from '../../server/appRouter'
 
@@ -300,7 +346,7 @@ export default createOpenApiNextHandler({ router: appRouter })
 Please see [full example here](examples/with-serverless).
 
 ```typescript
-import { createOpenApiAwsLambdaHandler } from 'trpc-openapi'
+import { createOpenApiAwsLambdaHandler } from 'trpc-swagger'
 
 import { appRouter } from './appRouter'
 
@@ -314,7 +360,7 @@ Please see [full example here](examples/with-fastify).
 ```typescript
 import { fastifyTRPCPlugin } from '@trpc/server/adapters/fastify'
 import Fastify from 'fastify'
-import { fastifyTRPCOpenApiPlugin } from 'trpc-openapi'
+import { fastifyTRPCOpenApiPlugin } from 'trpc-swagger'
 
 import { appRouter } from './router'
 
@@ -352,7 +398,7 @@ Please see [full typings here](src/types.ts).
 
 | Property         | Type                               | Description                                                                                                        | Required | Default                |
 | ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
-| `enabled`        | `boolean`                          | Exposes this procedure to `trpc-openapi` adapters and on the OpenAPI document.                                     | `false`  | `true`                 |
+| `enabled`        | `boolean`                          | Exposes this procedure to `trpc-swagger` adapters and on the OpenAPI document.                                     | `false`  | `true`                 |
 | `method`         | `HttpMethod`                       | HTTP method this endpoint is exposed on. Value can be `GET`, `POST`, `PATCH`, `PUT` or `DELETE`.                   | `true`   | `undefined`            |
 | `path`           | `string`                           | Pathname this endpoint is exposed on. Value must start with `/`, specify path parameters using `{}`.               | `true`   | `undefined`            |
 | `protect`        | `boolean`                          | Requires this endpoint to use a security scheme.                                                                   | `false`  | `false`                |

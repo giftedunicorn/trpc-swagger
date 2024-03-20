@@ -1,16 +1,21 @@
-/* eslint-disable @typescript-eslint/ban-types */
-import { initTRPC } from '@trpc/server'
-import express from 'express'
-import fetch from 'node-fetch'
-import { z } from 'zod'
+import { initTRPC } from "@trpc/server"
+import express from "express"
+import fetch from "node-fetch"
+import { z } from "zod"
 
-import {
-  CreateOpenApiExpressMiddlewareOptions,
-  OpenApiMeta,
-  OpenApiRouter,
-  createOpenApiExpressMiddleware,
-} from '../../src'
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
+import { CreateOpenApiExpressMiddlewareOptions, OpenApiMeta, OpenApiRouter, createOpenApiExpressMiddleware } from "../../src"
 
+// Application Sectional || Define Instance
+// =================================================================================================
+// =================================================================================================
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
+
+// Application Sectional || Define Functions
+// =================================================================================================
+// =================================================================================================
 const createContextMock = jest.fn()
 const responseMetaMock = jest.fn()
 const onErrorMock = jest.fn()
@@ -21,22 +26,25 @@ const clearMocks = () => {
   onErrorMock.mockClear()
 }
 
+// Application Sectional || Define Router Server
+// =================================================================================================
+// =================================================================================================
 const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
   handlerOpts: CreateOpenApiExpressMiddlewareOptions<TRouter>,
-  serverOpts?: { basePath?: `/${string}` },
+  serverOpts?: { basePath?: `/${string}` }
 ) => {
   const openApiExpressMiddleware = createOpenApiExpressMiddleware({
     router: handlerOpts.router,
     createContext: handlerOpts.createContext ?? createContextMock,
     responseMeta: handlerOpts.responseMeta ?? responseMetaMock,
     onError: handlerOpts.onError ?? onErrorMock,
-    maxBodySize: handlerOpts.maxBodySize,
+    maxBodySize: handlerOpts.maxBodySize
   } as any)
 
   const app = express()
 
   // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  app.use(serverOpts?.basePath ?? '/', openApiExpressMiddleware)
+  app.use(serverOpts?.basePath ?? "/", openApiExpressMiddleware)
 
   const server = app.listen(0)
   const port = (server.address() as any).port as number
@@ -44,46 +52,47 @@ const createExpressServerWithRouter = <TRouter extends OpenApiRouter>(
 
   return {
     url,
-    close: () => server.close(),
+    close: () => server.close()
   }
 }
 
-const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
-
-describe('express adapter', () => {
+// Application Sectional || Define Test Scripts
+// =================================================================================================
+// =================================================================================================
+describe("express adapter", () => {
   afterEach(() => {
     clearMocks()
   })
 
-  test('with valid routes', async () => {
+  test("with valid routes", async () => {
     const appRouter = t.router({
       sayHelloQuery: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/say-hello' } })
+        .meta({ openapi: { method: "GET", path: "/say-hello" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
       sayHelloMutation: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/say-hello' } })
+        .meta({ openapi: { method: "POST", path: "/say-hello" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
       sayHelloSlash: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/say/hello' } })
+        .meta({ openapi: { method: "GET", path: "/say/hello" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
-        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` }))
     })
 
-    const { url, close } = createExpressServerWithRouter({
-      router: appRouter,
-    })
+    const { url, close } = createExpressServerWithRouter(
+      { router: appRouter }
+    )
 
     {
-      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' })
+      const res = await fetch(`${url}/say-hello?name=James`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(body).toEqual({ greeting: "Hello James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -92,14 +101,14 @@ describe('express adapter', () => {
     }
     {
       const res = await fetch(`${url}/say-hello`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'James' }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "James" })
       })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(body).toEqual({ greeting: "Hello James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -107,11 +116,11 @@ describe('express adapter', () => {
       clearMocks()
     }
     {
-      const res = await fetch(`${url}/say/hello?name=James`, { method: 'GET' })
+      const res = await fetch(`${url}/say/hello?name=James`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(body).toEqual({ greeting: "Hello James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -120,26 +129,26 @@ describe('express adapter', () => {
     close()
   })
 
-  test('with basePath', async () => {
+  test("with basePath", async () => {
     const appRouter = t.router({
       echo: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/echo' } })
+        .meta({ openapi: { method: "GET", path: "/echo" } })
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
-        .query(({ input }) => ({ payload: input.payload })),
+        .query(({ input }) => ({ payload: input.payload }))
     })
 
     const { url, close } = createExpressServerWithRouter(
       { router: appRouter },
-      { basePath: '/open-api' },
+      { basePath: "/open-api" }
     )
 
-    const res = await fetch(`${url}/open-api/echo?payload=vercjames`, { method: 'GET' })
+    const res = await fetch(`${url}/open-api/echo?payload=jlalmes`, { method: "GET" })
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body).toEqual({
-      payload: 'vercjames',
+      payload: "jlalmes"
     })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)

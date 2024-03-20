@@ -1,15 +1,21 @@
-import { initTRPC } from '@trpc/server'
-import fastify from 'fastify'
-import fetch from 'node-fetch'
-import { z } from 'zod'
+import { initTRPC } from "@trpc/server"
+import fastify from "fastify"
+import fetch from "node-fetch"
+import { z } from "zod"
 
-import {
-  CreateOpenApiFastifyPluginOptions,
-  OpenApiMeta,
-  OpenApiRouter,
-  fastifyTRPCOpenApiPlugin,
-} from '../../src'
+// Application Sectional || Define Imports
+// =================================================================================================
+// =================================================================================================
+import { CreateOpenApiFastifyPluginOptions, OpenApiMeta, OpenApiRouter, fastifyTRPCOpenApiPlugin } from "../../src"
 
+// Application Sectional || Define Instance
+// =================================================================================================
+// =================================================================================================
+const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
+
+// Application Sectional || Define Functions
+// =================================================================================================
+// =================================================================================================
 const createContextMock = jest.fn()
 const responseMetaMock = jest.fn()
 const onErrorMock = jest.fn()
@@ -20,12 +26,15 @@ const clearMocks = () => {
   onErrorMock.mockClear()
 }
 
+// Application Sectional || Define Router Server
+// =================================================================================================
+// =================================================================================================
 const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
   handler: CreateOpenApiFastifyPluginOptions<TRouter>,
   opts?: {
-    serverOpts?: { basePath?: `/${string}` }
-    prefix?: string
-  },
+    serverOpts?: { basePath?: `/${string}` };
+    prefix?: string;
+  }
 ) => {
   const server = fastify()
 
@@ -35,14 +44,14 @@ const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
     responseMeta: handler.responseMeta ?? responseMetaMock,
     onError: handler.onError ?? onErrorMock,
     maxBodySize: handler.maxBodySize,
-    basePath: opts?.serverOpts?.basePath,
+    basePath: opts?.serverOpts?.basePath
   }
 
   await server.register(
     async (server) => {
       await server.register(fastifyTRPCOpenApiPlugin, openApiFastifyPluginOptions)
     },
-    { prefix: opts?.prefix ?? '' },
+    { prefix: opts?.prefix ?? "" }
   )
 
   const port = 0
@@ -50,44 +59,47 @@ const createFastifyServerWithRouter = async <TRouter extends OpenApiRouter>(
 
   return {
     url,
-    close: () => server.close(),
+    close: () => server.close()
   }
 }
 
-const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
-
-describe('fastify adapter', () => {
+// Application Sectional || Define Test Scripts
+// =================================================================================================
+// =================================================================================================
+describe("fastify adapter", () => {
   afterEach(() => {
     clearMocks()
   })
 
-  test('with valid routes', async () => {
+  test("with valid routes", async () => {
     const appRouter = t.router({
       sayHelloQuery: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/say-hello' } })
+        .meta({ openapi: { method: "GET", path: "/say-hello" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
       sayHelloMutation: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/say-hello' } })
+        .meta({ openapi: { method: "POST", path: "/say-hello" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
         .mutation(({ input }) => ({ greeting: `Hello ${input.name}!` })),
       sayHelloSlash: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/say/hello' } })
+        .meta({ openapi: { method: "GET", path: "/say/hello" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ greeting: z.string() }))
-        .query(({ input }) => ({ greeting: `Hello ${input.name}!` })),
+        .query(({ input }) => ({ greeting: `Hello ${input.name}!` }))
     })
 
-    const { url, close } = await createFastifyServerWithRouter({ router: appRouter })
+    const { url, close } = await createFastifyServerWithRouter(
+      { router: appRouter }
+    )
 
     {
-      const res = await fetch(`${url}/say-hello?name=James`, { method: 'GET' })
+      const res = await fetch(`${url}/say-hello?name=James`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(body).toEqual({ greeting: "Hello James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -96,14 +108,14 @@ describe('fastify adapter', () => {
     }
     {
       const res = await fetch(`${url}/say-hello`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'James' }),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "James" })
       })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(body).toEqual({ greeting: "Hello James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -111,11 +123,11 @@ describe('fastify adapter', () => {
       clearMocks()
     }
     {
-      const res = await fetch(`${url}/say/hello?name=James`, { method: 'GET' })
+      const res = await fetch(`${url}/say/hello?name=James`, { method: "GET" })
       const body = await res.json()
 
       expect(res.status).toBe(200)
-      expect(body).toEqual({ greeting: 'Hello James!' })
+      expect(body).toEqual({ greeting: "Hello James!" })
       expect(createContextMock).toHaveBeenCalledTimes(1)
       expect(responseMetaMock).toHaveBeenCalledTimes(1)
       expect(onErrorMock).toHaveBeenCalledTimes(0)
@@ -124,26 +136,26 @@ describe('fastify adapter', () => {
     await close()
   })
 
-  test('with basePath', async () => {
+  test("with basePath", async () => {
     const appRouter = t.router({
       echo: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/echo' } })
+        .meta({ openapi: { method: "GET", path: "/echo" } })
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
-        .query(({ input }) => ({ payload: input.payload })),
+        .query(({ input }) => ({ payload: input.payload }))
     })
 
     const { url, close } = await createFastifyServerWithRouter(
       { router: appRouter },
-      { serverOpts: { basePath: '/open-api' } },
+      { serverOpts: { basePath: "/open-api" } }
     )
 
-    const res = await fetch(`${url}/open-api/echo?payload=vercjames`, { method: 'GET' })
+    const res = await fetch(`${url}/open-api/echo?payload=jlalmes`, { method: "GET" })
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body).toEqual({
-      payload: 'vercjames',
+      payload: "jlalmes"
     })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)
@@ -152,30 +164,28 @@ describe('fastify adapter', () => {
     await close()
   })
 
-  test('with prefix', async () => {
+  test("with prefix", async () => {
     const appRouter = t.router({
       echo: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/echo' } })
+        .meta({ openapi: { method: "GET", path: "/echo" } })
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string(), context: z.undefined() }))
-        .query(({ input }) => ({ payload: input.payload })),
+        .query(({ input }) => ({ payload: input.payload }))
     })
 
     const { url, close } = await createFastifyServerWithRouter(
       { router: appRouter },
-      {
-        prefix: '/api-prefix',
-      },
+      { prefix: "/api-prefix" }
     )
 
-    const res = await fetch(`${url}/api-prefix/echo?payload=vercjames`, {
-      method: 'GET',
+    const res = await fetch(`${url}/api-prefix/echo?payload=jlalmes`, {
+      method: "GET"
     })
     const body = await res.json()
 
     expect(res.status).toBe(200)
     expect(body).toEqual({
-      payload: 'vercjames',
+      payload: "jlalmes"
     })
     expect(createContextMock).toHaveBeenCalledTimes(1)
     expect(responseMetaMock).toHaveBeenCalledTimes(1)

@@ -2,23 +2,21 @@ import {
   CreateOpenApiAwsLambdaHandlerOptions,
   CreateOpenApiExpressMiddlewareOptions,
   CreateOpenApiFastifyPluginOptions,
-  CreateOpenApiFetchHandlerOptions,
   CreateOpenApiHttpHandlerOptions,
   CreateOpenApiNextHandlerOptions,
   CreateOpenApiNuxtHandlerOptions,
   createOpenApiAwsLambdaHandler,
   createOpenApiExpressMiddleware,
-  createOpenApiFetchHandler,
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
   createOpenApiNuxtHandler,
   fastifyTRPCOpenApiPlugin,
-} from './adapters'
+} from './adapters';
 import {
   GenerateOpenApiDocumentOptions,
   generateOpenApiDocument,
   openApiVersion,
-} from './generator'
+} from './generator';
 import {
   OpenApiErrorResponse,
   OpenApiMeta,
@@ -26,8 +24,8 @@ import {
   OpenApiResponse,
   OpenApiRouter,
   OpenApiSuccessResponse,
-} from './types'
-import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod'
+} from './types';
+import { ZodTypeLikeString, ZodTypeLikeVoid } from './utils/zod';
 
 export {
   CreateOpenApiAwsLambdaHandlerOptions,
@@ -35,10 +33,8 @@ export {
   CreateOpenApiHttpHandlerOptions,
   CreateOpenApiNextHandlerOptions,
   CreateOpenApiFastifyPluginOptions,
-  CreateOpenApiFetchHandlerOptions,
   CreateOpenApiNuxtHandlerOptions,
   createOpenApiExpressMiddleware,
-  createOpenApiFetchHandler,
   createOpenApiHttpHandler,
   createOpenApiNextHandler,
   createOpenApiNuxtHandler,
@@ -55,4 +51,4 @@ export {
   OpenApiErrorResponse,
   ZodTypeLikeString,
   ZodTypeLikeVoid,
-}
+};

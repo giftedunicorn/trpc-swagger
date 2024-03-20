@@ -1,16 +1,15 @@
-import { initTRPC } from '@trpc/server'
-import { observable } from '@trpc/server/observable'
-import openAPISchemaValidator from 'openapi-schema-validator'
-import { z } from 'zod'
+import { initTRPC } from "@trpc/server"
+import { observable } from "@trpc/server/observable"
+import openAPISchemaValidator from "openapi-schema-validator"
+import { z } from "zod"
 
 import {
   GenerateOpenApiDocumentOptions,
   OpenApiMeta,
   generateOpenApiDocument,
-  openApiVersion,
-} from '../src'
-import { errorResponseObject } from '../src/generator/schema'
-import * as zodUtils from '../src/utils/zod'
+  openApiVersion
+} from "../src"
+import * as zodUtils from "../src/utils/zod"
 
 // TODO: test for duplicate paths (using getPathRegExp)
 
@@ -19,26 +18,26 @@ const openApiSchemaValidator = new openAPISchemaValidator({ version: openApiVers
 const t = initTRPC.meta<OpenApiMeta>().context<any>().create()
 
 const defaultDocOpts: GenerateOpenApiDocumentOptions = {
-  title: 'tRPC OpenAPI',
-  version: '1.0.0',
-  baseUrl: 'http://localhost:3000/api',
+  title: "tRPC OpenAPI",
+  version: "1.0.0",
+  baseUrl: "http://localhost:3000/api"
 }
 
-describe('generator', () => {
-  test('open api version', () => {
-    expect(openApiVersion).toBe('3.0.3')
+describe("generator", () => {
+  test("open api version", () => {
+    expect(openApiVersion).toBe("3.0.3")
   })
 
-  test('with empty router', () => {
+  test("with empty router", () => {
     const appRouter = t.router({})
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
-      title: 'tRPC OpenAPI',
-      version: '1.0.0',
-      description: 'API documentation',
-      baseUrl: 'http://localhost:3000/api',
-      docsUrl: 'http://localhost:3000/docs',
-      tags: [],
+      title: "tRPC OpenAPI",
+      version: "1.0.0",
+      description: "API documentation",
+      baseUrl: "http://localhost:3000/api",
+      docsUrl: "http://localhost:3000/docs",
+      tags: []
     })
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
@@ -112,119 +111,119 @@ describe('generator', () => {
     `)
   })
 
-  test('with missing input', () => {
+  test("with missing input", () => {
     {
       const appRouter = t.router({
         noInput: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/no-input' } })
+          .meta({ openapi: { method: "GET", path: "/no-input" } })
           .output(z.object({ name: z.string() }))
-          .query(() => ({ name: 'vercjames' })),
+          .query(() => ({ name: "jlalmes" }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.noInput] - Input parser expects a Zod validator')
+      }).toThrowError("[query.noInput] - Input parser expects a Zod validator")
     }
     {
       const appRouter = t.router({
         noInput: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/no-input' } })
+          .meta({ openapi: { method: "POST", path: "/no-input" } })
           .output(z.object({ name: z.string() }))
-          .mutation(() => ({ name: 'vercjames' })),
+          .mutation(() => ({ name: "jlalmes" }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[mutation.noInput] - Input parser expects a Zod validator')
+      }).toThrowError("[mutation.noInput] - Input parser expects a Zod validator")
     }
   })
 
-  test('with missing output', () => {
+  test("with missing output", () => {
     {
       const appRouter = t.router({
         noOutput: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/no-output' } })
+          .meta({ openapi: { method: "GET", path: "/no-output" } })
           .input(z.object({ name: z.string() }))
-          .query(({ input }) => ({ name: input.name })),
+          .query(({ input }) => ({ name: input.name }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.noOutput] - Output parser expects a Zod validator')
+      }).toThrowError("[query.noOutput] - Output parser expects a Zod validator")
     }
     {
       const appRouter = t.router({
         noOutput: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/no-output' } })
+          .meta({ openapi: { method: "POST", path: "/no-output" } })
           .input(z.object({ name: z.string() }))
-          .mutation(({ input }) => ({ name: input.name })),
+          .mutation(({ input }) => ({ name: input.name }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[mutation.noOutput] - Output parser expects a Zod validator')
+      }).toThrowError("[mutation.noOutput] - Output parser expects a Zod validator")
     }
   })
 
-  test('with non-zod parser', () => {
+  test("with non-zod parser", () => {
     {
       const appRouter = t.router({
         badInput: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/bad-input' } })
-          .input((arg) => ({ payload: typeof arg === 'string' ? arg : String(arg) }))
+          .meta({ openapi: { method: "GET", path: "/bad-input" } })
+          .input((arg) => ({ payload: typeof arg === "string" ? arg : String(arg) }))
           .output(z.object({ payload: z.string() }))
-          .query(({ input }) => ({ payload: 'Hello world!' })),
+          .query(({ input }) => ({ payload: "Hello world!" }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.badInput] - Input parser expects a Zod validator')
+      }).toThrowError("[query.badInput] - Input parser expects a Zod validator")
     }
     {
       const appRouter = t.router({
         badInput: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/bad-input' } })
+          .meta({ openapi: { method: "GET", path: "/bad-input" } })
           .input(z.object({ payload: z.string() }))
-          .output((arg) => ({ payload: typeof arg === 'string' ? arg : String(arg) }))
-          .query(({ input }) => ({ payload: input.payload })),
+          .output((arg) => ({ payload: typeof arg === "string" ? arg : String(arg) }))
+          .query(({ input }) => ({ payload: input.payload }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.badInput] - Output parser expects a Zod validator')
+      }).toThrowError("[query.badInput] - Output parser expects a Zod validator")
     }
   })
 
-  test('with non-object input', () => {
+  test("with non-object input", () => {
     {
       const appRouter = t.router({
         badInput: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/bad-input' } })
+          .meta({ openapi: { method: "GET", path: "/bad-input" } })
           .input(z.string())
           .output(z.null())
-          .query(() => null),
+          .query(() => null)
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.badInput] - Input parser must be a ZodObject')
+      }).toThrowError("[query.badInput] - Input parser must be a ZodObject")
     }
     {
       const appRouter = t.router({
         badInput: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/bad-input' } })
+          .meta({ openapi: { method: "POST", path: "/bad-input" } })
           .input(z.string())
           .output(z.null())
-          .mutation(() => null),
+          .mutation(() => null)
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[mutation.badInput] - Input parser must be a ZodObject')
+      }).toThrowError("[mutation.badInput] - Input parser must be a ZodObject")
     }
   })
 
-  test('with object non-string input', () => {
+  test("with object non-string input", () => {
     // only applies when zod does not support (below version v3.20.0)
 
     // @ts-expect-error - hack to disable zodSupportsCoerce
@@ -234,29 +233,29 @@ describe('generator', () => {
     {
       const appRouter = t.router({
         badInput: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/bad-input' } })
+          .meta({ openapi: { method: "GET", path: "/bad-input" } })
           .input(z.object({ age: z.number().min(0).max(122) })) // RIP Jeanne Calment
           .output(z.object({ name: z.string() }))
-          .query(() => ({ name: 'vercjames' })),
+          .query(() => ({ name: "jlalmes" }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.badInput] - Input parser key: "age" must be ZodString')
+      }).toThrowError("[query.badInput] - Input parser key: \"age\" must be ZodString")
     }
     {
       const appRouter = t.router({
         okInput: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/ok-input' } })
+          .meta({ openapi: { method: "POST", path: "/ok-input" } })
           .input(z.object({ age: z.number().min(0).max(122) }))
           .output(z.object({ name: z.string() }))
-          .mutation(() => ({ name: 'vercjames' })),
+          .mutation(() => ({ name: "jlalmes" }))
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/ok-input']!.post!.requestBody).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/ok-input"]!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
             "application/json": Object {
@@ -287,140 +286,140 @@ describe('generator', () => {
     zodUtils.zodSupportsCoerce = true
   })
 
-  test('with bad method', () => {
+  test("with bad method", () => {
     const appRouter = t.router({
       badMethod: t.procedure
         // @ts-expect-error - bad method
-        .meta({ openapi: { method: 'BAD_METHOD', path: '/bad-method' } })
+        .meta({ openapi: { method: "BAD_METHOD", path: "/bad-method" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
-        .query(({ input }) => ({ name: input.name })),
+        .query(({ input }) => ({ name: input.name }))
     })
 
     expect(() => {
       generateOpenApiDocument(appRouter, defaultDocOpts)
-    }).toThrowError('[query.badMethod] - Method must be GET, POST, PATCH, PUT or DELETE')
+    }).toThrowError("[query.badMethod] - Method must be GET, POST, PATCH, PUT or DELETE")
   })
 
-  test('with duplicate routes', () => {
+  test("with duplicate routes", () => {
     {
       const appRouter = t.router({
         procedure1: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/procedure' } })
+          .meta({ openapi: { method: "GET", path: "/procedure" } })
           .input(z.object({ name: z.string() }))
           .output(z.object({ name: z.string() }))
           .query(({ input }) => ({ name: input.name })),
         procedure2: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/procedure' } })
+          .meta({ openapi: { method: "GET", path: "/procedure" } })
           .input(z.object({ name: z.string() }))
           .output(z.object({ name: z.string() }))
-          .query(({ input }) => ({ name: input.name })),
+          .query(({ input }) => ({ name: input.name }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure')
+      }).toThrowError("[query.procedure2] - Duplicate procedure defined for route GET /procedure")
     }
     {
       const appRouter = t.router({
         procedure1: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/procedure/' } })
+          .meta({ openapi: { method: "GET", path: "/procedure/" } })
           .input(z.object({ name: z.string() }))
           .output(z.object({ name: z.string() }))
           .query(({ input }) => ({ name: input.name })),
         procedure2: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/procedure' } })
+          .meta({ openapi: { method: "GET", path: "/procedure" } })
           .input(z.object({ name: z.string() }))
           .output(z.object({ name: z.string() }))
-          .query(({ input }) => ({ name: input.name })),
+          .query(({ input }) => ({ name: input.name }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.procedure2] - Duplicate procedure defined for route GET /procedure')
+      }).toThrowError("[query.procedure2] - Duplicate procedure defined for route GET /procedure")
     }
   })
 
-  test('with unsupported subscription', () => {
+  test("with unsupported subscription", () => {
     const appRouter = t.router({
       currentName: t.procedure
-        .meta({ openapi: { method: 'PATCH', path: '/current-name' } })
+        .meta({ openapi: { method: "PATCH", path: "/current-name" } })
         .input(z.object({ name: z.string() }))
         .subscription(({ input }) => {
           return observable((emit) => {
             emit.next(input.name)
             return () => null
           })
-        }),
+        })
     })
 
     expect(() => {
       generateOpenApiDocument(appRouter, defaultDocOpts)
-    }).toThrowError('[subscription.currentName] - Subscriptions are not supported by OpenAPI v3')
+    }).toThrowError("[subscription.currentName] - Subscriptions are not supported by OpenAPI v3")
   })
 
-  test('with void and path parameters', () => {
+  test("with void and path parameters", () => {
     const appRouter = t.router({
       pathParameters: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/path-parameters/{name}' } })
+        .meta({ openapi: { method: "GET", path: "/path-parameters/{name}" } })
         .input(z.void())
         .output(z.object({ name: z.string() }))
-        .query(() => ({ name: 'asdf' })),
+        .query(() => ({ name: "asdf" }))
     })
 
     expect(() => {
       generateOpenApiDocument(appRouter, defaultDocOpts)
-    }).toThrowError('[query.pathParameters] - Input parser must be a ZodObject')
+    }).toThrowError("[query.pathParameters] - Input parser must be a ZodObject")
   })
 
-  test('with optional path parameters', () => {
+  test("with optional path parameters", () => {
     const appRouter = t.router({
       pathParameters: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/path-parameters/{name}' } })
+        .meta({ openapi: { method: "GET", path: "/path-parameters/{name}" } })
         .input(z.object({ name: z.string().optional() }))
         .output(z.object({ name: z.string() }))
-        .query(() => ({ name: 'asdf' })),
+        .query(() => ({ name: "asdf" }))
     })
 
     expect(() => {
       generateOpenApiDocument(appRouter, defaultDocOpts)
-    }).toThrowError('[query.pathParameters] - Path parameter: "name" must not be optional')
+    }).toThrowError("[query.pathParameters] - Path parameter: \"name\" must not be optional")
   })
 
-  test('with missing path parameters', () => {
+  test("with missing path parameters", () => {
     const appRouter = t.router({
       pathParameters: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/path-parameters/{name}' } })
+        .meta({ openapi: { method: "GET", path: "/path-parameters/{name}" } })
         .input(z.object({}))
         .output(z.object({ name: z.string() }))
-        .query(() => ({ name: 'asdf' })),
+        .query(() => ({ name: "asdf" }))
     })
 
     expect(() => {
       generateOpenApiDocument(appRouter, defaultDocOpts)
-    }).toThrowError('[query.pathParameters] - Input parser expects key from path: "name"')
+    }).toThrowError("[query.pathParameters] - Input parser expects key from path: \"name\"")
   })
 
-  // test for https://github.com/vercjames/trpc-swagger/issues/296
-  test('with post & only path paramters', () => {
+  // test for https://github.com/jlalmes/trpc-openapi/issues/296
+  test("with post & only path paramters", () => {
     const appRouter = t.router({
       noBody: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/no-body/{name}' } })
+        .meta({ openapi: { method: "POST", path: "/no-body/{name}" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
         .mutation(({ input }) => ({ name: input.name })),
       emptyBody: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/empty-body' } })
+        .meta({ openapi: { method: "POST", path: "/empty-body" } })
         .input(z.object({}))
         .output(z.object({ name: z.string() }))
-        .mutation(() => ({ name: 'James' })),
+        .mutation(() => ({ name: "James" }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/no-body/{name}']!.post!.requestBody).toBe(undefined)
-    expect(openApiDocument.paths['/empty-body']!.post!.requestBody).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/no-body/{name}"]!.post!.requestBody).toBe(undefined)
+    expect(openApiDocument.paths["/empty-body"]!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -437,33 +436,33 @@ describe('generator', () => {
     `)
   })
 
-  test('with valid procedures', () => {
+  test("with valid procedures", () => {
     const appRouter = t.router({
       createUser: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/users' } })
+        .meta({ openapi: { method: "POST", path: "/users" } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ id: z.string(), name: z.string() }))
-        .mutation(({ input }) => ({ id: 'user-id', name: input.name })),
+        .mutation(({ input }) => ({ id: "user-id", name: input.name })),
       readUsers: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/users' } })
+        .meta({ openapi: { method: "GET", path: "/users" } })
         .input(z.void())
         .output(z.array(z.object({ id: z.string(), name: z.string() })))
-        .query(() => [{ id: 'user-id', name: 'name' }]),
+        .query(() => [{ id: "user-id", name: "name" }]),
       readUser: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/users/{id}' } })
+        .meta({ openapi: { method: "GET", path: "/users/{id}" } })
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string(), name: z.string() }))
-        .query(({ input }) => ({ id: input.id, name: 'name' })),
+        .query(({ input }) => ({ id: input.id, name: "name" })),
       updateUser: t.procedure
-        .meta({ openapi: { method: 'PATCH', path: '/users/{id}' } })
+        .meta({ openapi: { method: "PATCH", path: "/users/{id}" } })
         .input(z.object({ id: z.string(), name: z.string().optional() }))
         .output(z.object({ id: z.string(), name: z.string() }))
-        .mutation(({ input }) => ({ id: input.id, name: input.name ?? 'name' })),
+        .mutation(({ input }) => ({ id: input.id, name: input.name ?? "name" })),
       deleteUser: t.procedure
-        .meta({ openapi: { method: 'DELETE', path: '/users/{id}' } })
+        .meta({ openapi: { method: "DELETE", path: "/users/{id}" } })
         .input(z.object({ id: z.string() }))
         .output(z.void())
-        .mutation(() => undefined),
+        .mutation(() => undefined)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
@@ -793,13 +792,13 @@ describe('generator', () => {
     `)
   })
 
-  test('with disabled', () => {
+  test("with disabled", () => {
     const appRouter = t.router({
       getMe: t.procedure
-        .meta({ openapi: { enabled: false, method: 'GET', path: '/me' } })
+        .meta({ openapi: { enabled: false, method: "GET", path: "/me" } })
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
-        .query(({ input }) => ({ id: input.id })),
+        .query(({ input }) => ({ id: input.id }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
@@ -808,89 +807,89 @@ describe('generator', () => {
     expect(Object.keys(openApiDocument.paths).length).toBe(0)
   })
 
-  test('with summary, description & tags', () => {
+  test("with summary, description & tags", () => {
     const appRouter = t.router({
       getMe: t.procedure
         .meta({
           openapi: {
-            method: 'GET',
-            path: '/metadata/all',
-            summary: 'Short summary',
-            description: 'Verbose description',
-            tags: ['tagA', 'tagB'],
-          },
+            method: "GET",
+            path: "/metadata/all",
+            summary: "Short summary",
+            description: "Verbose description",
+            tags: ["tagA", "tagB"]
+          }
         })
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
-        .query(({ input }) => ({ name: input.name })),
+        .query(({ input }) => ({ name: input.name }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/metadata/all']!.get!.summary).toBe('Short summary')
-    expect(openApiDocument.paths['/metadata/all']!.get!.description).toBe('Verbose description')
-    expect(openApiDocument.paths['/metadata/all']!.get!.tags).toEqual(['tagA', 'tagB'])
+    expect(openApiDocument.paths["/metadata/all"]!.get!.summary).toBe("Short summary")
+    expect(openApiDocument.paths["/metadata/all"]!.get!.description).toBe("Verbose description")
+    expect(openApiDocument.paths["/metadata/all"]!.get!.tags).toEqual(["tagA", "tagB"])
   })
 
-  test('with security', () => {
+  test("with security", () => {
     const appRouter = t.router({
       protectedEndpoint: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/secure/endpoint', protect: true } })
+        .meta({ openapi: { method: "POST", path: "/secure/endpoint", protect: true } })
         .input(z.object({ name: z.string() }))
         .output(z.object({ name: z.string() }))
-        .query(({ input }) => ({ name: input.name })),
+        .query(({ input }) => ({ name: input.name }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/secure/endpoint']!.post!.security).toEqual([
-      { Authorization: [] },
+    expect(openApiDocument.paths["/secure/endpoint"]!.post!.security).toEqual([
+      { Authorization: [] }
     ])
   })
 
-  test('with schema descriptions', () => {
+  test("with schema descriptions", () => {
     const appRouter = t.router({
       createUser: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/user' } })
+        .meta({ openapi: { method: "POST", path: "/user" } })
         .input(
           z
             .object({
-              id: z.string().uuid().describe('User ID'),
-              name: z.string().describe('User name'),
+              id: z.string().uuid().describe("User ID"),
+              name: z.string().describe("User name")
             })
-            .describe('Request body input'),
+            .describe("Request body input")
         )
         .output(
           z
             .object({
-              id: z.string().uuid().describe('User ID'),
-              name: z.string().describe('User name'),
+              id: z.string().uuid().describe("User ID"),
+              name: z.string().describe("User name")
             })
-            .describe('User data'),
+            .describe("User data")
         )
-        .mutation(({ input }) => ({ id: input.id, name: 'James' })),
+        .mutation(({ input }) => ({ id: input.id, name: "James" })),
       getUser: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/user' } })
+        .meta({ openapi: { method: "GET", path: "/user" } })
         .input(
-          z.object({ id: z.string().uuid().describe('User ID') }).describe('Query string inputs'),
+          z.object({ id: z.string().uuid().describe("User ID") }).describe("Query string inputs")
         )
         .output(
           z
             .object({
-              id: z.string().uuid().describe('User ID'),
-              name: z.string().describe('User name'),
+              id: z.string().uuid().describe("User ID"),
+              name: z.string().describe("User name")
             })
-            .describe('User data'),
+            .describe("User data")
         )
-        .query(({ input }) => ({ id: input.id, name: 'James' })),
+        .query(({ input }) => ({ id: input.id, name: "James" }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/user']!.post!).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/user"]!.post!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
         "operationId": "createUser",
@@ -962,7 +961,7 @@ describe('generator', () => {
         "tags": undefined,
       }
     `)
-    expect(openApiDocument.paths['/user']!.get!).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/user"]!.get!).toMatchInlineSnapshot(`
       Object {
         "description": undefined,
         "operationId": "getUser",
@@ -1021,21 +1020,21 @@ describe('generator', () => {
     `)
   })
 
-  test('with void', () => {
+  test("with void", () => {
     {
       const appRouter = t.router({
         void: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/void' } })
+          .meta({ openapi: { method: "GET", path: "/void" } })
           .input(z.void())
           .output(z.void())
-          .query(() => undefined),
+          .query(() => undefined)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/void']!.get!.parameters).toEqual([])
-      expect(openApiDocument.paths['/void']!.get!.responses[200]).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/void"]!.get!.parameters).toEqual([])
+      expect(openApiDocument.paths["/void"]!.get!.responses[200]).toMatchInlineSnapshot(`
         Object {
           "content": Object {
             "application/json": Object {
@@ -1051,17 +1050,17 @@ describe('generator', () => {
     {
       const appRouter = t.router({
         void: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/void' } })
+          .meta({ openapi: { method: "POST", path: "/void" } })
           .input(z.void())
           .output(z.void())
-          .mutation(() => undefined),
+          .mutation(() => undefined)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/void']!.post!.requestBody).toMatchInlineSnapshot(`undefined`)
-      expect(openApiDocument.paths['/void']!.post!.responses[200]).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/void"]!.post!.requestBody).toMatchInlineSnapshot("undefined")
+      expect(openApiDocument.paths["/void"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1076,19 +1075,19 @@ describe('generator', () => {
     }
   })
 
-  test('with null', () => {
+  test("with null", () => {
     const appRouter = t.router({
       null: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/null' } })
+        .meta({ openapi: { method: "POST", path: "/null" } })
         .input(z.void())
         .output(z.null())
-        .mutation(() => null),
+        .mutation(() => null)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/null']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/null"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1107,22 +1106,22 @@ describe('generator', () => {
     `)
   })
 
-  test('with undefined', () => {
+  test("with undefined", () => {
     const appRouter = t.router({
       undefined: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/undefined' } })
+        .meta({ openapi: { method: "POST", path: "/undefined" } })
         .input(z.undefined())
         .output(z.undefined())
-        .mutation(() => undefined),
+        .mutation(() => undefined)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/undefined']!.post!.requestBody).toMatchInlineSnapshot(
-      `undefined`,
+    expect(openApiDocument.paths["/undefined"]!.post!.requestBody).toMatchInlineSnapshot(
+      "undefined"
     )
-    expect(openApiDocument.paths['/undefined']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/undefined"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1138,19 +1137,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with nullish', () => {
+  test("with nullish", () => {
     const appRouter = t.router({
       nullish: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/nullish' } })
+        .meta({ openapi: { method: "POST", path: "/nullish" } })
         .input(z.void())
         .output(z.string().nullish())
-        .mutation(() => null),
+        .mutation(() => null)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/nullish']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/nullish"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1174,21 +1173,21 @@ describe('generator', () => {
     `)
   })
 
-  test('with never', () => {
+  test("with never", () => {
     const appRouter = t.router({
       never: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/never' } })
+        .meta({ openapi: { method: "POST", path: "/never" } })
         .input(z.never())
         .output(z.never())
         // @ts-expect-error - cannot return never
-        .mutation(() => undefined),
+        .mutation(() => undefined)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/never']!.post!.requestBody).toMatchInlineSnapshot(`undefined`)
-    expect(openApiDocument.paths['/never']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/never"]!.post!.requestBody).toMatchInlineSnapshot("undefined")
+    expect(openApiDocument.paths["/never"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1204,24 +1203,24 @@ describe('generator', () => {
     `)
   })
 
-  test('with optional query param', () => {
+  test("with optional query param", () => {
     const appRouter = t.router({
       optionalParam: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/optional-param' } })
+        .meta({ openapi: { method: "GET", path: "/optional-param" } })
         .input(z.object({ one: z.string().optional(), two: z.string() }))
         .output(z.string().optional())
         .query(({ input }) => input.one),
       optionalObject: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/optional-object' } })
+        .meta({ openapi: { method: "GET", path: "/optional-object" } })
         .input(z.object({ one: z.string().optional(), two: z.string() }).optional())
         .output(z.string().optional())
-        .query(({ input }) => input?.two),
+        .query(({ input }) => input?.two)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/optional-param']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-param"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1245,7 +1244,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/optional-param']!.get!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-param"]!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1266,7 +1265,7 @@ describe('generator', () => {
         "headers": undefined,
       }
     `)
-    expect(openApiDocument.paths['/optional-object']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-object"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1290,7 +1289,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/optional-object']!.get!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-object"]!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1313,24 +1312,24 @@ describe('generator', () => {
     `)
   })
 
-  test('with optional request body', () => {
+  test("with optional request body", () => {
     const appRouter = t.router({
       optionalParam: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/optional-param' } })
+        .meta({ openapi: { method: "POST", path: "/optional-param" } })
         .input(z.object({ one: z.string().optional(), two: z.string() }))
         .output(z.string().optional())
         .query(({ input }) => input.one),
       optionalObject: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/optional-object' } })
+        .meta({ openapi: { method: "POST", path: "/optional-object" } })
         .input(z.object({ one: z.string().optional(), two: z.string() }).optional())
         .output(z.string().optional())
-        .query(({ input }) => input?.two),
+        .query(({ input }) => input?.two)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/optional-param']!.post!.requestBody).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-param"]!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1355,7 +1354,7 @@ describe('generator', () => {
         "required": true,
       }
     `)
-    expect(openApiDocument.paths['/optional-param']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-param"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1376,7 +1375,7 @@ describe('generator', () => {
         "headers": undefined,
       }
     `)
-    expect(openApiDocument.paths['/optional-object']!.post!.requestBody).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-object"]!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1401,7 +1400,7 @@ describe('generator', () => {
         "required": false,
       }
     `)
-    expect(openApiDocument.paths['/optional-object']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/optional-object"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1424,19 +1423,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with default', () => {
+  test("with default", () => {
     const appRouter = t.router({
       default: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/default' } })
-        .input(z.object({ payload: z.string().default('James') }))
-        .output(z.string().default('James'))
-        .query(({ input }) => input.payload),
+        .meta({ openapi: { method: "GET", path: "/default" } })
+        .input(z.object({ payload: z.string().default("James") }))
+        .output(z.string().default("James"))
+        .query(({ input }) => input.payload)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/default']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/default"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1451,7 +1450,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/default']!.get!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/default"]!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1468,20 +1467,20 @@ describe('generator', () => {
     `)
   })
 
-  test('with refine', () => {
+  test("with refine", () => {
     {
       const appRouter = t.router({
         refine: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/refine' } })
+          .meta({ openapi: { method: "POST", path: "/refine" } })
           .input(z.object({ a: z.string().refine((arg) => arg.length > 10) }))
           .output(z.null())
-          .mutation(() => null),
+          .mutation(() => null)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/refine"]!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
             "application/json": Object {
@@ -1507,16 +1506,16 @@ describe('generator', () => {
     {
       const appRouter = t.router({
         objectRefine: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/object-refine' } })
+          .meta({ openapi: { method: "POST", path: "/object-refine" } })
           .input(z.object({ a: z.string(), b: z.string() }).refine((data) => data.a === data.b))
           .output(z.null())
-          .mutation(() => null),
+          .mutation(() => null)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/object-refine"]!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
             "application/json": Object {
@@ -1545,21 +1544,21 @@ describe('generator', () => {
     }
   })
 
-  test('with async refine', () => {
+  test("with async refine", () => {
     {
       const appRouter = t.router({
         refine: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/refine' } })
+          .meta({ openapi: { method: "POST", path: "/refine" } })
           // eslint-disable-next-line @typescript-eslint/require-await
           .input(z.object({ a: z.string().refine(async (arg) => arg.length > 10) }))
           .output(z.null())
-          .mutation(() => null),
+          .mutation(() => null)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/refine']!.post!.requestBody).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/refine"]!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
             "application/json": Object {
@@ -1585,19 +1584,19 @@ describe('generator', () => {
     {
       const appRouter = t.router({
         objectRefine: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/object-refine' } })
+          .meta({ openapi: { method: "POST", path: "/object-refine" } })
           .input(
             // eslint-disable-next-line @typescript-eslint/require-await
-            z.object({ a: z.string(), b: z.string() }).refine(async (data) => data.a === data.b),
+            z.object({ a: z.string(), b: z.string() }).refine(async (data) => data.a === data.b)
           )
           .output(z.null())
-          .mutation(() => null),
+          .mutation(() => null)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/object-refine']!.post!.requestBody).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/object-refine"]!.post!.requestBody).toMatchInlineSnapshot(`
         Object {
           "content": Object {
             "application/json": Object {
@@ -1626,19 +1625,19 @@ describe('generator', () => {
     }
   })
 
-  test('with transform', () => {
+  test("with transform", () => {
     const appRouter = t.router({
       transform: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/transform' } })
+        .meta({ openapi: { method: "GET", path: "/transform" } })
         .input(z.object({ age: z.string().transform((input) => parseInt(input)) }))
         .output(z.object({ age: z.string().transform((input) => parseInt(input)) }))
-        .query(({ input }) => ({ age: input.age.toString() })),
+        .query(({ input }) => ({ age: input.age.toString() }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/transform']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/transform"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1654,28 +1653,28 @@ describe('generator', () => {
     `)
   })
 
-  test('with preprocess', () => {
+  test("with preprocess", () => {
     const appRouter = t.router({
       transform: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/preprocess' } })
+        .meta({ openapi: { method: "GET", path: "/preprocess" } })
         .input(
           z.object({
             payload: z.preprocess((arg) => {
-              if (typeof arg === 'string') {
+              if (typeof arg === "string") {
                 return parseInt(arg)
               }
               return arg
-            }, z.number()),
-          }),
+            }, z.number())
+          })
         )
         .output(z.number())
-        .query(({ input }) => input.payload),
+        .query(({ input }) => input.payload)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/preprocess']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/preprocess"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1689,7 +1688,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/preprocess']!.get!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/preprocess"]!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1705,19 +1704,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with coerce', () => {
+  test("with coerce", () => {
     const appRouter = t.router({
       transform: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/coerce' } })
+        .meta({ openapi: { method: "GET", path: "/coerce" } })
         .input(z.object({ payload: z.number() }))
         .output(z.number())
-        .query(({ input }) => input.payload),
+        .query(({ input }) => input.payload)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/coerce']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/coerce"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1731,7 +1730,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/coerce']!.get!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/coerce"]!.get!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -1747,33 +1746,33 @@ describe('generator', () => {
     `)
   })
 
-  test('with union', () => {
+  test("with union", () => {
     {
       const appRouter = t.router({
         union: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/union' } })
+          .meta({ openapi: { method: "GET", path: "/union" } })
           .input(z.object({ payload: z.string().or(z.object({})) }))
           .output(z.null())
-          .query(() => null),
+          .query(() => null)
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.union] - Input parser key: "payload" must be ZodString')
+      }).toThrowError("[query.union] - Input parser key: \"payload\" must be ZodString")
     }
     {
       const appRouter = t.router({
         union: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/union' } })
-          .input(z.object({ payload: z.string().or(z.literal('James')) }))
+          .meta({ openapi: { method: "GET", path: "/union" } })
+          .input(z.object({ payload: z.string().or(z.literal("James")) }))
           .output(z.null())
-          .query(() => null),
+          .query(() => null)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/union']!.get!.parameters).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/union"]!.get!.parameters).toMatchInlineSnapshot(`
         Array [
           Object {
             "description": undefined,
@@ -1800,26 +1799,26 @@ describe('generator', () => {
     }
   })
 
-  test('with intersection', () => {
+  test("with intersection", () => {
     const appRouter = t.router({
       intersection: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/intersection' } })
+        .meta({ openapi: { method: "GET", path: "/intersection" } })
         .input(
           z.object({
             payload: z.intersection(
-              z.union([z.literal('a'), z.literal('b')]),
-              z.union([z.literal('b'), z.literal('c')]),
-            ),
-          }),
+              z.union([z.literal("a"), z.literal("b")]),
+              z.union([z.literal("b"), z.literal("c")])
+            )
+          })
         )
         .output(z.null())
-        .query(() => null),
+        .query(() => null)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/intersection']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/intersection"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1868,19 +1867,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with lazy', () => {
+  test("with lazy", () => {
     const appRouter = t.router({
       lazy: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/lazy' } })
+        .meta({ openapi: { method: "GET", path: "/lazy" } })
         .input(z.object({ payload: z.lazy(() => z.string()) }))
         .output(z.null())
-        .query(() => null),
+        .query(() => null)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/lazy']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/lazy"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1896,19 +1895,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with literal', () => {
+  test("with literal", () => {
     const appRouter = t.router({
       literal: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/literal' } })
-        .input(z.object({ payload: z.literal('literal') }))
+        .meta({ openapi: { method: "GET", path: "/literal" } })
+        .input(z.object({ payload: z.literal("literal") }))
         .output(z.null())
-        .query(() => null),
+        .query(() => null)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/literal']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/literal"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1927,19 +1926,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with enum', () => {
+  test("with enum", () => {
     const appRouter = t.router({
       enum: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/enum' } })
-        .input(z.object({ name: z.enum(['James', 'vercjames']) }))
+        .meta({ openapi: { method: "GET", path: "/enum" } })
+        .input(z.object({ name: z.enum(["James", "jlalmes"]) }))
         .output(z.null())
-        .query(() => null),
+        .query(() => null)
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/enum']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/enum"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -1950,7 +1949,7 @@ describe('generator', () => {
           "schema": Object {
             "enum": Array [
               "James",
-              "vercjames",
+              "jlalmes",
             ],
             "type": "string",
           },
@@ -1959,43 +1958,43 @@ describe('generator', () => {
     `)
   })
 
-  test('with native-enum', () => {
+  test("with native-enum", () => {
     {
       enum InvalidEnum {
         James,
-        vercjames,
+        jlalmes,
       }
 
       const appRouter = t.router({
         nativeEnum: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/nativeEnum' } })
+          .meta({ openapi: { method: "GET", path: "/nativeEnum" } })
           .input(z.object({ name: z.nativeEnum(InvalidEnum) }))
           .output(z.null())
-          .query(() => null),
+          .query(() => null)
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[query.nativeEnum] - Input parser key: "name" must be ZodString')
+      }).toThrowError("[query.nativeEnum] - Input parser key: \"name\" must be ZodString")
     }
     {
       enum ValidEnum {
-        James = 'James',
-        vercjames = 'vercjames',
+        James = "James",
+        jlalmes = "jlalmes",
       }
 
       const appRouter = t.router({
         nativeEnum: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/nativeEnum' } })
+          .meta({ openapi: { method: "GET", path: "/nativeEnum" } })
           .input(z.object({ name: z.nativeEnum(ValidEnum) }))
           .output(z.null())
-          .query(() => null),
+          .query(() => null)
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-      expect(openApiDocument.paths['/nativeEnum']!.get!.parameters).toMatchInlineSnapshot(`
+      expect(openApiDocument.paths["/nativeEnum"]!.get!.parameters).toMatchInlineSnapshot(`
         Array [
           Object {
             "description": undefined,
@@ -2006,7 +2005,7 @@ describe('generator', () => {
             "schema": Object {
               "enum": Array [
                 "James",
-                "vercjames",
+                "jlalmes",
               ],
               "type": "string",
             },
@@ -2016,21 +2015,21 @@ describe('generator', () => {
     }
   })
 
-  test('with no refs', () => {
+  test("with no refs", () => {
     const schemas = { emails: z.array(z.string().email()) }
 
     const appRouter = t.router({
       refs: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/refs' } })
+        .meta({ openapi: { method: "POST", path: "/refs" } })
         .input(z.object({ allowed: schemas.emails, blocked: schemas.emails }))
         .output(z.object({ allowed: schemas.emails, blocked: schemas.emails }))
-        .mutation(() => ({ allowed: [], blocked: [] })),
+        .mutation(() => ({ allowed: [], blocked: [] }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/refs']!.post!.requestBody).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/refs"]!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -2064,7 +2063,7 @@ describe('generator', () => {
         "required": true,
       }
     `)
-    expect(openApiDocument.paths['/refs']!.post!.responses[200]).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/refs"]!.post!.responses[200]).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -2101,31 +2100,31 @@ describe('generator', () => {
     `)
   })
 
-  test('with custom header', () => {
+  test("with custom header", () => {
     const appRouter = t.router({
       echo: t.procedure
         .meta({
           openapi: {
-            method: 'GET',
-            path: '/echo',
+            method: "GET",
+            path: "/echo",
             headers: [
               {
-                name: 'x-custom-header',
+                name: "x-custom-header",
                 required: true,
-                description: 'Some custom header',
-              },
-            ],
-          },
+                description: "Some custom header"
+              }
+            ]
+          }
         })
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
-        .query(({ input }) => ({ id: input.id })),
+        .query(({ input }) => ({ id: input.id }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/echo']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/echo"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "Some custom header",
@@ -2147,68 +2146,22 @@ describe('generator', () => {
     `)
   })
 
-  test('with extra response object', () => {
-    const appRouter = t.router({
-      echo: t.procedure
-        .meta({
-          openapi: {
-            method: 'GET',
-            path: '/echo',
-            extraResponses: {
-              400: {
-                description: 'Bad request',
-                content: z.object({ reason: z.string() }),
-              },
-            },
-          },
-        })
-        .input(z.object({ id: z.string() }))
-        .output(z.object({ id: z.string() }))
-        .query(({ input }) => ({ id: input.id })),
-    })
-
-    const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
-
-    expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/echo']!.get!.responses['400']).toMatchInlineSnapshot(`
-      Object {
-        "content": Object {
-          "application/json": Object {
-            "schema": Object {
-              "additionalProperties": false,
-              "properties": Object {
-                "reason": Object {
-                  "type": "string",
-                },
-              },
-              "required": Array [
-                "reason",
-              ],
-              "type": "object",
-            },
-          },
-        },
-        "description": "Bad request",
-      }
-    `)
-  })
-
-  test('with DELETE mutation', () => {
+  test("with DELETE mutation", () => {
     const appRouter = t.router({
       deleteMutation: t.procedure
-        .meta({ openapi: { method: 'DELETE', path: '/mutation/delete' } })
+        .meta({ openapi: { method: "DELETE", path: "/mutation/delete" } })
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
-        .mutation(({ input }) => ({ id: input.id })),
+        .mutation(({ input }) => ({ id: input.id }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/mutation/delete']!.delete!.requestBody).toMatchInlineSnapshot(
-      `undefined`,
+    expect(openApiDocument.paths["/mutation/delete"]!.delete!.requestBody).toMatchInlineSnapshot(
+      "undefined"
     )
-    expect(openApiDocument.paths['/mutation/delete']!.delete!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/mutation/delete"]!.delete!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -2224,19 +2177,19 @@ describe('generator', () => {
     `)
   })
 
-  test('with POST query', () => {
+  test("with POST query", () => {
     const appRouter = t.router({
       postQuery: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/query/post' } })
+        .meta({ openapi: { method: "POST", path: "/query/post" } })
         .input(z.object({ id: z.string() }))
         .output(z.object({ id: z.string() }))
-        .query(({ input }) => ({ id: input.id })),
+        .query(({ input }) => ({ id: input.id }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/query/post']!.post!.requestBody).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/query/post"]!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -2258,29 +2211,29 @@ describe('generator', () => {
         "required": true,
       }
     `)
-    expect(openApiDocument.paths['/query/post']!.post!.parameters).toMatchInlineSnapshot(
-      `Array []`,
+    expect(openApiDocument.paths["/query/post"]!.post!.parameters).toMatchInlineSnapshot(
+      "Array []"
     )
   })
 
-  test('with top-level preprocess', () => {
+  test("with top-level preprocess", () => {
     const appRouter = t.router({
       topLevelPreprocessQuery: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/top-level-preprocess' } })
+        .meta({ openapi: { method: "GET", path: "/top-level-preprocess" } })
         .input(z.preprocess((arg) => arg, z.object({ id: z.string() })))
         .output(z.preprocess((arg) => arg, z.object({ id: z.string() })))
         .query(({ input }) => ({ id: input.id })),
       topLevelPreprocessMutation: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/top-level-preprocess' } })
+        .meta({ openapi: { method: "POST", path: "/top-level-preprocess" } })
         .input(z.preprocess((arg) => arg, z.object({ id: z.string() })))
         .output(z.preprocess((arg) => arg, z.object({ id: z.string() })))
-        .mutation(({ input }) => ({ id: input.id })),
+        .mutation(({ input }) => ({ id: input.id }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/top-level-preprocess']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/top-level-preprocess"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -2294,7 +2247,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/top-level-preprocess']!.post!.requestBody)
+    expect(openApiDocument.paths["/top-level-preprocess"]!.post!.requestBody)
       .toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2319,27 +2272,27 @@ describe('generator', () => {
     `)
   })
 
-  test('with nested routers', () => {
+  test("with nested routers", () => {
     const appRouter = t.router({
       procedure: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/procedure' } })
+        .meta({ openapi: { method: "GET", path: "/procedure" } })
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
         .query(({ input }) => ({ payload: input.payload })),
       router: t.router({
         procedure: t.procedure
-          .meta({ openapi: { method: 'GET', path: '/router/procedure' } })
+          .meta({ openapi: { method: "GET", path: "/router/procedure" } })
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
           .query(({ input }) => ({ payload: input.payload })),
         router: t.router({
           procedure: t.procedure
-            .meta({ openapi: { method: 'GET', path: '/router/router/procedure' } })
+            .meta({ openapi: { method: "GET", path: "/router/router/procedure" } })
             .input(z.object({ payload: z.string() }))
             .output(z.object({ payload: z.string() }))
-            .query(({ input }) => ({ payload: input.payload })),
-        }),
-      }),
+            .query(({ input }) => ({ payload: input.payload }))
+        })
+      })
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
@@ -2495,26 +2448,26 @@ describe('generator', () => {
     `)
   })
 
-  test('with multiple inputs', () => {
+  test("with multiple inputs", () => {
     const appRouter = t.router({
       query: t.procedure
-        .meta({ openapi: { method: 'GET', path: '/query' } })
+        .meta({ openapi: { method: "GET", path: "/query" } })
         .input(z.object({ id: z.string() }))
         .input(z.object({ payload: z.string() }))
         .output(z.object({ id: z.string(), payload: z.string() }))
         .query(({ input }) => ({ id: input.id, payload: input.payload })),
       mutation: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/mutation' } })
+        .meta({ openapi: { method: "POST", path: "/mutation" } })
         .input(z.object({ id: z.string() }))
         .input(z.object({ payload: z.string() }))
         .output(z.object({ id: z.string(), payload: z.string() }))
-        .mutation(({ input }) => ({ id: input.id, payload: input.payload })),
+        .mutation(({ input }) => ({ id: input.id, payload: input.payload }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/query']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/query"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -2538,7 +2491,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/mutation']!.post!.requestBody).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/mutation"]!.post!.requestBody).toMatchInlineSnapshot(`
       Object {
         "content": Object {
           "application/json": Object {
@@ -2566,36 +2519,36 @@ describe('generator', () => {
     `)
   })
 
-  test('with content types', () => {
+  test("with content types", () => {
     {
       const appRouter = t.router({
         withNone: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/with-none', contentTypes: [] } })
+          .meta({ openapi: { method: "POST", path: "/with-none", contentTypes: [] } })
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
-          .mutation(({ input }) => ({ payload: input.payload })),
+          .mutation(({ input }) => ({ payload: input.payload }))
       })
 
       expect(() => {
         generateOpenApiDocument(appRouter, defaultDocOpts)
-      }).toThrowError('[mutation.withNone] - At least one content type must be specified')
+      }).toThrowError("[mutation.withNone] - At least one content type must be specified")
     }
     {
       const appRouter = t.router({
         withUrlencoded: t.procedure
           .meta({
             openapi: {
-              method: 'POST',
-              path: '/with-urlencoded',
-              contentTypes: ['application/x-www-form-urlencoded'],
-            },
+              method: "POST",
+              path: "/with-urlencoded",
+              contentTypes: ["application/x-www-form-urlencoded"]
+            }
           })
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
           .mutation(({ input }) => ({ payload: input.payload })),
         withJson: t.procedure
           .meta({
-            openapi: { method: 'POST', path: '/with-json', contentTypes: ['application/json'] },
+            openapi: { method: "POST", path: "/with-json", contentTypes: ["application/json"] }
           })
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
@@ -2603,132 +2556,132 @@ describe('generator', () => {
         withAll: t.procedure
           .meta({
             openapi: {
-              method: 'POST',
-              path: '/with-all',
-              contentTypes: ['application/json', 'application/x-www-form-urlencoded'],
-            },
+              method: "POST",
+              path: "/with-all",
+              contentTypes: ["application/json", "application/x-www-form-urlencoded"]
+            }
           })
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
           .mutation(({ input }) => ({ payload: input.payload })),
         withDefault: t.procedure
-          .meta({ openapi: { method: 'POST', path: '/with-default' } })
+          .meta({ openapi: { method: "POST", path: "/with-default" } })
           .input(z.object({ payload: z.string() }))
           .output(z.object({ payload: z.string() }))
-          .mutation(({ input }) => ({ payload: input.payload })),
+          .mutation(({ input }) => ({ payload: input.payload }))
       })
 
       const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
       expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
       expect(
-        Object.keys((openApiDocument.paths['/with-urlencoded']!.post!.requestBody as any).content),
-      ).toEqual(['application/x-www-form-urlencoded'])
+        Object.keys((openApiDocument.paths["/with-urlencoded"]!.post!.requestBody as any).content)
+      ).toEqual(["application/x-www-form-urlencoded"])
       expect(
-        Object.keys((openApiDocument.paths['/with-json']!.post!.requestBody as any).content),
-      ).toEqual(['application/json'])
+        Object.keys((openApiDocument.paths["/with-json"]!.post!.requestBody as any).content)
+      ).toEqual(["application/json"])
       expect(
-        Object.keys((openApiDocument.paths['/with-all']!.post!.requestBody as any).content),
-      ).toEqual(['application/json', 'application/x-www-form-urlencoded'])
+        Object.keys((openApiDocument.paths["/with-all"]!.post!.requestBody as any).content)
+      ).toEqual(["application/json", "application/x-www-form-urlencoded"])
       expect(
-        (openApiDocument.paths['/with-all']!.post!.requestBody as any).content['application/json'],
+        (openApiDocument.paths["/with-all"]!.post!.requestBody as any).content["application/json"]
       ).toEqual(
-        (openApiDocument.paths['/with-all']!.post!.requestBody as any).content[
-          'application/x-www-form-urlencoded'
-        ],
+        (openApiDocument.paths["/with-all"]!.post!.requestBody as any).content[
+          "application/x-www-form-urlencoded"
+        ]
       )
       expect(
-        Object.keys((openApiDocument.paths['/with-default']!.post!.requestBody as any).content),
-      ).toEqual(['application/json'])
+        Object.keys((openApiDocument.paths["/with-default"]!.post!.requestBody as any).content)
+      ).toEqual(["application/json"])
     }
   })
 
-  test('with deprecated', () => {
+  test("with deprecated", () => {
     const appRouter = t.router({
       deprecated: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/deprecated', deprecated: true } })
+        .meta({ openapi: { method: "POST", path: "/deprecated", deprecated: true } })
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
-        .mutation(({ input }) => ({ payload: input.payload })),
+        .mutation(({ input }) => ({ payload: input.payload }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/deprecated']!.post!.deprecated).toEqual(true)
+    expect(openApiDocument.paths["/deprecated"]!.post!.deprecated).toEqual(true)
   })
 
-  test('with security schemes', () => {
+  test("with security schemes", () => {
     const appRouter = t.router({
       protected: t.procedure
-        .meta({ openapi: { method: 'POST', path: '/protected', protect: true } })
+        .meta({ openapi: { method: "POST", path: "/protected", protect: true } })
         .input(z.object({ payload: z.string() }))
         .output(z.object({ payload: z.string() }))
-        .mutation(({ input }) => ({ payload: input.payload })),
+        .mutation(({ input }) => ({ payload: input.payload }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, {
       ...defaultDocOpts,
       securitySchemes: {
         ApiKey: {
-          type: 'apiKey',
-          in: 'header',
-          name: 'X-API-Key',
-        },
-      },
+          type: "apiKey",
+          in: "header",
+          name: "X-API-Key"
+        }
+      }
     })
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
     expect(openApiDocument.components!.securitySchemes).toEqual({
       ApiKey: {
-        type: 'apiKey',
-        in: 'header',
-        name: 'X-API-Key',
-      },
+        type: "apiKey",
+        in: "header",
+        name: "X-API-Key"
+      }
     })
-    expect(openApiDocument.paths['/protected']!.post!.security).toEqual([{ ApiKey: [] }])
+    expect(openApiDocument.paths["/protected"]!.post!.security).toEqual([{ ApiKey: [] }])
   })
 
-  test('with examples', () => {
+  test("with examples", () => {
     const appRouter = t.router({
       queryExample: t.procedure
         .meta({
           openapi: {
-            method: 'GET',
-            path: '/query-example/{name}',
+            method: "GET",
+            path: "/query-example/{name}",
             example: {
-              request: { name: 'James', greeting: 'Hello' },
-              response: { output: 'Hello James' },
-            },
-          },
+              request: { name: "James", greeting: "Hello" },
+              response: { output: "Hello James" }
+            }
+          }
         })
         .input(z.object({ name: z.string(), greeting: z.string() }))
         .output(z.object({ output: z.string() }))
         .query(({ input }) => ({
-          output: `${input.greeting} ${input.name}`,
+          output: `${input.greeting} ${input.name}`
         })),
       mutationExample: t.procedure
         .meta({
           openapi: {
-            method: 'POST',
-            path: '/mutation-example/{name}',
+            method: "POST",
+            path: "/mutation-example/{name}",
             example: {
-              request: { name: 'James', greeting: 'Hello' },
-              response: { output: 'Hello James' },
-            },
-          },
+              request: { name: "James", greeting: "Hello" },
+              response: { output: "Hello James" }
+            }
+          }
         })
         .input(z.object({ name: z.string(), greeting: z.string() }))
         .output(z.object({ output: z.string() }))
         .mutation(({ input }) => ({
-          output: `${input.greeting} ${input.name}`,
-        })),
+          output: `${input.greeting} ${input.name}`
+        }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/query-example/{name}"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -2752,7 +2705,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/query-example/{name}']!.get!.responses[200])
+    expect(openApiDocument.paths["/query-example/{name}"]!.get!.responses[200])
       .toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2778,7 +2731,7 @@ describe('generator', () => {
         "headers": undefined,
       }
     `)
-    expect(openApiDocument.paths['/mutation-example/{name}']!.post!.parameters)
+    expect(openApiDocument.paths["/mutation-example/{name}"]!.post!.parameters)
       .toMatchInlineSnapshot(`
       Array [
         Object {
@@ -2793,7 +2746,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/mutation-example/{name}']!.post!.requestBody)
+    expect(openApiDocument.paths["/mutation-example/{name}"]!.post!.requestBody)
       .toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2818,7 +2771,7 @@ describe('generator', () => {
         "required": true,
       }
     `)
-    expect(openApiDocument.paths['/mutation-example/{name}']!.post!.responses[200])
+    expect(openApiDocument.paths["/mutation-example/{name}"]!.post!.responses[200])
       .toMatchInlineSnapshot(`
       Object {
         "content": Object {
@@ -2846,40 +2799,40 @@ describe('generator', () => {
     `)
   })
 
-  test('with response headers', () => {
+  test("with response headers", () => {
     const appRouter = t.router({
       queryExample: t.procedure
         .meta({
           openapi: {
-            method: 'GET',
-            path: '/query-example/{name}',
+            method: "GET",
+            path: "/query-example/{name}",
             responseHeaders: {
-              'X-RateLimit-Limit': {
-                description: 'Request limit per hour.',
+              "X-RateLimit-Limit": {
+                description: "Request limit per hour.",
                 schema: {
-                  type: 'integer',
-                },
+                  type: "integer"
+                }
               },
-              'X-RateLimit-Remaining': {
-                description: 'The number of requests left for the time window.',
+              "X-RateLimit-Remaining": {
+                description: "The number of requests left for the time window.",
                 schema: {
-                  type: 'integer',
-                },
-              },
-            },
-          },
+                  type: "integer"
+                }
+              }
+            }
+          }
         })
         .input(z.object({ name: z.string(), greeting: z.string() }))
         .output(z.object({ output: z.string() }))
         .query(({ input }) => ({
-          output: `${input.greeting} ${input.name}`,
-        })),
+          output: `${input.greeting} ${input.name}`
+        }))
     })
 
     const openApiDocument = generateOpenApiDocument(appRouter, defaultDocOpts)
 
     expect(openApiSchemaValidator.validate(openApiDocument).errors).toEqual([])
-    expect(openApiDocument.paths['/query-example/{name}']!.get!.parameters).toMatchInlineSnapshot(`
+    expect(openApiDocument.paths["/query-example/{name}"]!.get!.parameters).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": undefined,
@@ -2903,7 +2856,7 @@ describe('generator', () => {
         },
       ]
     `)
-    expect(openApiDocument.paths['/query-example/{name}']!.get!.responses[200])
+    expect(openApiDocument.paths["/query-example/{name}"]!.get!.responses[200])
       .toMatchInlineSnapshot(`
       Object {
         "content": Object {
