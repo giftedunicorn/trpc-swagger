@@ -1,6 +1,6 @@
 {
   "name": "trpc-swagger",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "tRPC Swagger Wrapper",
   "private": true,
   "license": "MIT",
