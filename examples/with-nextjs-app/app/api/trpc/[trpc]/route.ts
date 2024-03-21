@@ -1,23 +1,24 @@
-import { createOpenApiFetchHandler } from "trpc-swagger"
-import { appRouter, createContext } from "@/server/router"
+import { fetchRequestHandler } from "@trpc/server/adapters/fetch"
+import { RouterTrpc, createContext } from "@/server"
 
 // Application Component || Define Handler
 // =================================================================================================
 // =================================================================================================
 const handler = (req: Request) => {
-  // Handle incoming swagger/openapi requests
-  return createOpenApiFetchHandler({
+  // Handle incoming tRPC requests
+  return fetchRequestHandler({
     req,
-    endpoint: "/api",
-    router: appRouter,
+    endpoint: "/api/trpc",
+    router: RouterTrpc,
     // createContext: () => { return {} },
-    createContext,
+    createContext
   })
 }
+
 // Application Component || Define Exports
 // =================================================================================================
 // =================================================================================================
 export {
   handler as GET,
-  handler as POST,
+  handler as POST
 }

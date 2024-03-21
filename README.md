@@ -9,6 +9,7 @@
   <hr />
 </div>
 
+
 ## **[Swagger](https://swagger.io/specification/) support for [tRPC](https://trpc.io/)** 🧩
 
 - Easy REST endpoints for your tRPC procedures.
@@ -19,6 +20,19 @@
 The original repo [trpc-openapi](https://github.com/James/trpc-openapi) no longer appears to be maintained. 
 The goal of this fork is to add more control for error responses, support more frameworks, and support the new procedure types in @trpc v11.x.x.
 PRs Are welcome
+
+## Local Examples
+If you've pulled the repo. you can run any of the example projects by first running these 2 commands:
+```
+yarn install
+```
+```
+yarn build
+```
+Then select a workspace
+```yaml
+yarn workspace with-nextjs-router run dev
+```
 
 ## Usage
 
@@ -37,23 +51,7 @@ pnpm add trpc-swagger
 bun add trpc-swagger
 ```
 
-**2. Example Project Tree**
-
-    .
-    ├── @ // project root       # 
-    │   ├── package.json        #
-    │   ├── server              # 
-    │   |   ├── index.ts        # 
-    │   |   ├── client.ts       # 
-    │   |   ├── swagger.ts      #
-    │   |   ├── trpc.ts         #
-    │   |   └── ...             # etc.
-    │   └── ...                 # etc.
-    └── ...                     # etc.
-
-
-**3. Add `OpenApiMeta` to your tRPC instance**
-
+**2. Add `OpenApiMeta` to your tRPC instance**
 
 ```typescript
 // @/server/trpc.ts
@@ -70,7 +68,7 @@ const t = initTRPC.meta<OpenApiMeta>().create()
 const t = initTRPC.meta<OpenApiMeta>().create({ ... })
 ```
 
-**4. Enable `openapi` support for a procedure.**
+**3. Enable `openapi` support for a procedure.**
 
 
 ```typescript
@@ -92,7 +90,7 @@ export const appRouter = t.router({
 })
 ```
 
-**5. Generate an OpenAPI document.**
+**4. Generate an OpenAPI document.**
 
 ```typescript
 // @/server/swagger.ts

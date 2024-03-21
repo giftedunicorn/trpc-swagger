@@ -249,7 +249,7 @@ const postsRouter = t.router({
       })
     )
     .query(({ input }) => {
-      let posts: Post[] = database.posts
+      let { posts } = database
 
       if (input.userId) {
         posts = posts.filter((post) => {

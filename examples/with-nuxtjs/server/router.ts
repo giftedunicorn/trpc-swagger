@@ -80,6 +80,7 @@ const authRouter = t.router({
       z.object({
         email: z.string().email(),
         passcode: z.preprocess(
+          // eslint-disable-next-line radix
           (arg) => (typeof arg === "string" ? parseInt(arg) : arg),
           z.number().min(1000).max(9999)
         ),
@@ -129,6 +130,7 @@ const authRouter = t.router({
       z.object({
         email: z.string().email(),
         passcode: z.preprocess(
+          // eslint-disable-next-line radix
           (arg) => (typeof arg === "string" ? parseInt(arg) : arg),
           z.number().min(1000).max(9999)
         )
@@ -256,7 +258,7 @@ const postsRouter = t.router({
       })
     )
     .query(({ input }) => {
-      let posts: Post[] = database.posts
+      let { posts } = database
 
       if (input.userId) {
         posts = posts.filter((post) => {
