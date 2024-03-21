@@ -26,6 +26,7 @@ jspm_packages
 .swc
 .idea
 .next
+.nuxt
 .cache
 .build
 .fleet
