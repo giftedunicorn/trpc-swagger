@@ -2,7 +2,7 @@
   "compilerOptions": {
     "outDir": "build",
     "target": "ES2020",
-    "module": "ESNext",
+    "module": "commonjs",
     "strict": true,
     "declaration": true,
     "declarationMap": true,

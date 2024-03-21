@@ -31,7 +31,9 @@ yarn build
 ```
 Then select a workspace
 ```yaml
-yarn workspace with-nextjs-router run dev
+yarn workspace with-[WORKSPACE_NAME] run dev
+# Ergo 
+yarn workspace with-nextjs-app run dev
 ```
 
 ## Usage

@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
+import swaggerUi from "swagger-ui-express"
+import { createOpenApiExpressMiddleware } from "trpc-swagger"
 import { createExpressMiddleware } from "@trpc/server/adapters/express"
 import cors from "cors"
 import express from "express"
-import swaggerUi from "swagger-ui-express"
-import { createOpenApiExpressMiddleware } from "trpc-swagger"
 
 import { openApiDocument } from "./openapi"
 import { appRouter, createContext } from "./router"
