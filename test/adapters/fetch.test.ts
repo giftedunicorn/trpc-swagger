@@ -6,8 +6,8 @@ import { z } from "zod"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { CreateOpenApiFetchHandlerOptions, OpenApiErrorResponse, OpenApiMeta, OpenApiRouter, createOpenApiFetchHandler } from "../../src"
-import * as zodUtils from "../../src/utils/zod"
+import { CreateOpenApiFetchHandlerOptions, OpenApiErrorResponse, OpenApiMeta, OpenApiRouter, createOpenApiFetchHandler } from "../../packages"
+import * as zodUtils from "../../packages/utils/zod"
 
 // Application Sectional || Define Instance
 // =================================================================================================

@@ -144,7 +144,7 @@ export const createOpenApiNodeHttpHandler = <
       const statusCode = meta?.status ?? 200
       const headers = meta?.headers ?? {}
       const body: OpenApiSuccessResponse<typeof data> = data
-      // @ts-expect-error checking
+      // @ts-ignore - Expected Error: 'HTTPHeaders' is not assignable to parameter of type 'Record<string, string>'
       sendResponse(statusCode, headers, body)
     } catch (cause) {
       const error = getErrorFromUnknown(cause)
@@ -189,7 +189,7 @@ export const createOpenApiNodeHttpHandler = <
         code: error.code,
         issues: isInputValidationError ? (error.cause as ZodError).errors : undefined
       }
-      // @ts-expect-error checking
+      // @ts-ignore - Expected Error: 'HTTPHeaders' is not assignable to parameter of type 'Record<string, string>'
       sendResponse(statusCode, headers, body)
     }
   }

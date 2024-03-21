@@ -10,7 +10,7 @@ import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } fro
 // =================================================================================================
 // =================================================================================================
 export type CreateOpenApiExpressMiddlewareOptions<TRouter extends OpenApiRouter> =
-  // @ts-ignore - Expected Error 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
+  // @ts-ignore - Expected Error: 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
   CreateOpenApiNodeHttpHandlerOptions<TRouter, Request, Response>;
 
 // Application Sectional || Define Export Handler

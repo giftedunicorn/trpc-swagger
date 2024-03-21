@@ -6,7 +6,7 @@ import { z } from "zod"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { CreateOpenApiFastifyPluginOptions, OpenApiMeta, OpenApiRouter, fastifyTRPCOpenApiPlugin } from "../../src"
+import { CreateOpenApiFastifyPluginOptions, OpenApiMeta, OpenApiRouter, fastifyTRPCOpenApiPlugin } from "../../packages"
 
 // Application Sectional || Define Instance
 // =================================================================================================

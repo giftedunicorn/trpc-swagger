@@ -245,7 +245,7 @@ export const appRouter = t.router({
 
 ```
 
-Please see [error status codes here](src/adapters/node-http/errors.ts).
+Please see [error status codes here](packages/adapters/node-http/errors.ts).
 
 ## Authorization
 
@@ -380,7 +380,7 @@ main()
 
 #### GenerateOpenApiDocumentOptions
 
-Please see [full typings here](src/generator/index.ts).
+Please see [full typings here](packages/generator/index.ts).
 
 | Property          | Type                                   | Description                                             | Required |
 | ----------------- | -------------------------------------- | ------------------------------------------------------- | -------- |
@@ -394,7 +394,7 @@ Please see [full typings here](src/generator/index.ts).
 
 #### OpenApiMeta
 
-Please see [full typings here](src/types.ts).
+Please see [full typings here](packages/types.ts).
 
 | Property         | Type                               | Description                                                                                                        | Required | Default                |
 | ---------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ | -------- | ---------------------- |
@@ -414,7 +414,7 @@ Please see [full typings here](src/types.ts).
 
 #### CreateOpenApiNodeHttpHandlerOptions
 
-Please see [full typings here](src/adapters/node-http/core.ts).
+Please see [full typings here](packages/adapters/node-http/core.ts).
 
 | Property        | Type       | Description                                            | Required |
 | --------------- | ---------- | ------------------------------------------------------ | -------- |

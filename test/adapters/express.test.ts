@@ -6,7 +6,7 @@ import { z } from "zod"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { CreateOpenApiExpressMiddlewareOptions, OpenApiMeta, OpenApiRouter, createOpenApiExpressMiddleware } from "../../src"
+import { CreateOpenApiExpressMiddlewareOptions, OpenApiMeta, OpenApiRouter, createOpenApiExpressMiddleware } from "../../packages"
 
 // Application Sectional || Define Instance
 // =================================================================================================

@@ -1,7 +1,5 @@
 import { TRPCError } from "@trpc/server"
-import type { NodeIncomingMessage, NodeServerResponse } from "h3"
-import { defineEventHandler, getQuery } from "h3"
-import { IncomingMessage } from "http"
+import { NextApiRequest, NextApiResponse } from "next"
 
 // Application Sectional || Define Imports
 // =================================================================================================
@@ -13,34 +11,26 @@ import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } fro
 // Application Sectional || Define Export Type
 // =================================================================================================
 // =================================================================================================
-export type CreateOpenApiNuxtHandlerOptions<TRouter extends OpenApiRouter> = Omit<
-  // @ts-ignore - Expected Error 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
-  CreateOpenApiNodeHttpHandlerOptions<TRouter, NodeIncomingMessage, NodeServerResponse>,
+export type CreateOpenApiNextHandlerOptions<TRouter extends OpenApiRouter> = Omit<
+  // @ts-ignore - Expected Error: 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
+  CreateOpenApiNodeHttpHandlerOptions<TRouter, NextApiRequest, NextApiResponse>,
   "maxBodySize"
 >;
-
-type NuxtRequest = IncomingMessage & {
-  query?: ReturnType<typeof getQuery>;
-};
 
 // Application Sectional || Define Export Handler
 // =================================================================================================
 // =================================================================================================
-export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
-  opts: CreateOpenApiNuxtHandlerOptions<TRouter>
+export const createOpenApiNextHandler = <TRouter extends OpenApiRouter>(
+  opts: CreateOpenApiNextHandlerOptions<TRouter>
 ) => {
   const openApiHttpHandler = createOpenApiNodeHttpHandler(opts)
 
-  return defineEventHandler(async (event) => {
+  return async (req: NextApiRequest, res: NextApiResponse) => {
     let pathname: string | null = null
-
-    const params = event.context.params
-    if (params && params?.trpc) {
-      if (!params.trpc.includes("/")) {
-        pathname = params.trpc
-      } else {
-        pathname = params.trpc
-      }
+    if (typeof req.query.trpc === "string") {
+      pathname = req.query.trpc
+    } else if (Array.isArray(req.query.trpc)) {
+      pathname = req.query.trpc.join("/")
     }
 
     if (pathname === null) {
@@ -55,22 +45,21 @@ export const createOpenApiNuxtHandler = <TRouter extends OpenApiRouter>(
         path: undefined,
         input: undefined,
         ctx: undefined,
-        req: event.node.req
+        req
       })
 
-      event.node.res.statusCode = 500
-      event.node.res.setHeader("Content-Type", "application/json")
+      res.statusCode = 500
+      res.setHeader("Content-Type", "application/json")
       const body: OpenApiErrorResponse = {
         message: error.message,
         code: error.code
       }
-      event.node.res.end(JSON.stringify(body))
+      res.end(JSON.stringify(body))
 
       return
     }
 
-    (event.node.req as NuxtRequest).query = getQuery(event)
-    event.node.req.url = normalizePath(pathname)
-    await openApiHttpHandler(event.node.req, event.node.res)
-  })
+    req.url = normalizePath(pathname)
+    await openApiHttpHandler(req, res)
+  }
 }

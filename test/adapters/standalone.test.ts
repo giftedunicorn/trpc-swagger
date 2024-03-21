@@ -8,8 +8,8 @@ import { z } from "zod"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { CreateOpenApiHttpHandlerOptions, OpenApiErrorResponse, OpenApiMeta, OpenApiRouter, createOpenApiHttpHandler } from "../../src"
-import * as zodUtils from "../../src/utils/zod"
+import { CreateOpenApiHttpHandlerOptions, OpenApiErrorResponse, OpenApiMeta, OpenApiRouter, createOpenApiHttpHandler } from "../../packages"
+import * as zodUtils from "../../packages/utils/zod"
 
 // Application Sectional || Define Instance
 // =================================================================================================

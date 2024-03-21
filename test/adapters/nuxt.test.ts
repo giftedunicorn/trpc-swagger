@@ -6,7 +6,7 @@ import { z } from "zod"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { CreateOpenApiNuxtHandlerOptions, OpenApiMeta, OpenApiResponse, OpenApiRouter, createOpenApiNuxtHandler } from "../../src"
+import { CreateOpenApiNuxtHandlerOptions, OpenApiMeta, OpenApiResponse, OpenApiRouter, createOpenApiNuxtHandler } from "../../packages"
 
 // Application Sectional || Define Instance
 // =================================================================================================

@@ -8,8 +8,8 @@ import {
   OpenApiMeta,
   generateOpenApiDocument,
   openApiVersion
-} from "../src"
-import * as zodUtils from "../src/utils/zod"
+} from "../packages"
+import * as zodUtils from "../packages/utils/zod"
 
 // TODO: test for duplicate paths (using getPathRegExp)
 

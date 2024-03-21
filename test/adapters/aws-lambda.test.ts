@@ -6,7 +6,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyEventV2 } from "aws-lambda"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { OpenApiMeta, createOpenApiAwsLambdaHandler } from "../../src"
+import { OpenApiMeta, createOpenApiAwsLambdaHandler } from "../../packages"
 import { mockAPIGatewayContext, mockAPIGatewayProxyEventV1, mockAPIGatewayProxyEventV2 } from "./aws-lambda.utils"
 
 // Application Sectional || Define Constants

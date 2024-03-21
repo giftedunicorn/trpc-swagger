@@ -5,7 +5,7 @@ import { z } from "zod"
 // Application Sectional || Define Imports
 // =================================================================================================
 // =================================================================================================
-import { CreateOpenApiNextHandlerOptions, OpenApiMeta, OpenApiResponse, OpenApiRouter, createOpenApiNextHandler } from "../../src"
+import { CreateOpenApiNextHandlerOptions, OpenApiMeta, OpenApiResponse, OpenApiRouter, createOpenApiNextHandler } from "../../packages"
 
 // Application Sectional || Define Instance
 // =================================================================================================
