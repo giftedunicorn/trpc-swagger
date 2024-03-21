@@ -30,9 +30,11 @@ yarn install
 yarn build
 ```
 Then select a workspace
-```yaml
+```bash
 yarn workspace with-[WORKSPACE_NAME] run dev
-# Ergo 
+```
+Ergo
+```yaml
 yarn workspace with-nextjs-app run dev
 ```
 
