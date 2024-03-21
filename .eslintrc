@@ -32,18 +32,17 @@
     "keyword-spacing": ["error", { "before": true, "after": true }],
     "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
     "@typescript-eslint/no-misused-promises": ["error", { "checksVoidReturn": false }],
-
     "@typescript-eslint/no-unsafe-return": "off",// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-argument": "off",// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-assignment": "off",  // VERC: changed warn -> off
     "@typescript-eslint/no-non-null-assertion": "off", /// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-member-access": "off", // VERC: changed warn -> off
     "@typescript-eslint/no-redundant-type-constituents": "off",
-    "@typescript-eslint/ban-ts-comment": "off", // VERC: @trpc/server v11.x.x
-    "@typescript-eslint/no-explicit-any": "off",// VERC: Added to pass legacy intigrations
-    "@typescript-eslint/no-unsafe-call": "off", // VERC: Added to pass legacy intigrations
-    "@typescript-eslint/no-unused-vars": "off", // VERC: Added to pass legacy intigrations
-    "@typescript-eslint/ban-types": "off", // VERC: Added to pass legacy intigrations
+    "@typescript-eslint/ban-ts-comment": "off", // VERC: Added to pass legacy build intigrations
+    "@typescript-eslint/no-explicit-any": "off",// VERC: Added to pass legacy build intigrations
+    "@typescript-eslint/no-unsafe-call": "off", // VERC: Added to pass legacy build intigrations
+    "@typescript-eslint/no-unused-vars": "off", // VERC: Added to pass legacy build intigrations
+    "@typescript-eslint/ban-types": "off", // VERC: Added to pass legacy build intigrations
     "object-curly-spacing": ["error", "always"],
     "lines-around-directive": "off",
     "no-use-before-define": "off",

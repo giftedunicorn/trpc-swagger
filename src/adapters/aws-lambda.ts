@@ -115,7 +115,7 @@ export const createOpenApiAwsLambdaHandler = <TRouter extends OpenApiRouter, TEv
       const req = createMockNodeHTTPRequest(path, event)
       const res = createMockNodeHTTPResponse()
 
-      // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
+      // @ts-ignore - Expected Error 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
       await openApiHttpHandler(req, res)
 
       return {

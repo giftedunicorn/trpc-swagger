@@ -10,7 +10,7 @@ import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } fro
 // =================================================================================================
 // =================================================================================================
 export type CreateOpenApiHttpHandlerOptions<TRouter extends OpenApiRouter> =
-// @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
+// @ts-ignore - Expected Error 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
   CreateOpenApiNodeHttpHandlerOptions<TRouter, IncomingMessage, ServerResponse>;
 
 // Application Sectional || Define Export Handler

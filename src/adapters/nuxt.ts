@@ -14,7 +14,7 @@ import { CreateOpenApiNodeHttpHandlerOptions, createOpenApiNodeHttpHandler } fro
 // =================================================================================================
 // =================================================================================================
 export type CreateOpenApiNuxtHandlerOptions<TRouter extends OpenApiRouter> = Omit<
-  // @ts-ignore - @trpc/server v11.x.x support revisit after cores are stable
+  // @ts-ignore - Expected Error 'MockResponse<Response<any, Record<string, any>>>' is not assignable to parameter of type 'NodeHTTPResponse'.
   CreateOpenApiNodeHttpHandlerOptions<TRouter, NodeIncomingMessage, NodeServerResponse>,
   "maxBodySize"
 >;
