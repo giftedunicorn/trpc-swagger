@@ -23,8 +23,8 @@ export function getErrorFromUnknown(cause: unknown): TRPCError {
     return cause as TRPCError
   }
 
-  let errorCause: Error | undefined = undefined
-  let stack: string | undefined = undefined
+  let errorCause: Error | undefined
+  let stack: string | undefined
 
   if (cause instanceof Error) {
     errorCause = cause

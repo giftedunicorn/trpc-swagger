@@ -40,11 +40,10 @@ const createMockNodeHTTPRequest = (path: string, event: APIGatewayEvent): NodeHT
 
   const method = getHTTPMethod(event).toUpperCase() as RequestMethod
 
-  let body = undefined
-  const contentType =
-    event.headers[
-      Object.keys(event.headers).find((key) => key.toLowerCase() === "content-type") ?? ""
-    ]
+  let body
+  const contentType = event.headers[
+    Object.keys(event.headers).find((key) => key.toLowerCase() === "content-type") ?? ""
+  ]
   if (contentType === "application/json") {
     try {
       if (event.body) {

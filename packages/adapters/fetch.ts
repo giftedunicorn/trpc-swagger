@@ -68,13 +68,13 @@ const createRequestProxy = async (req: Request, url?: string) => {
   return new Proxy(req, {
     get: (target, prop) => {
       if (prop === "url") {
-        return url ? url : target.url
+        return url || target.url
       }
 
       if (prop === "headers") {
         return new Proxy(target.headers, {
-          get: (target, prop) => {
-            return target.get(prop.toString())
+          get: (trg, item) => {
+            return trg.get(item.toString())
           }
         })
       }

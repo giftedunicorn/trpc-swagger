@@ -68,7 +68,7 @@ export const getOpenApiPathsObject = (
           operationId: procedurePath.replace(/\./g, "-"),
           summary,
           description,
-          tags: tags,
+          tags,
           security: protect ? securitySchemeNames.map((name) => ({ [name]: [] })) : undefined,
           ...(acceptsRequestBody(method)
             ? {

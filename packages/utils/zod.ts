@@ -28,9 +28,9 @@ export type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
 
 export const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid => {
   return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid)
+    || instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined)
+    || instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
   )
 }
 
@@ -110,9 +110,9 @@ export type ZodTypeCoercible = z.ZodNumber | z.ZodBoolean | z.ZodBigInt | z.ZodD
 export const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoercible => {
   const type = unwrapZodType(_type, false)
   return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNumber) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBoolean) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBigInt) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDate)
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNumber)
+    || instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBoolean)
+    || instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBigInt)
+    || instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDate)
   )
 }

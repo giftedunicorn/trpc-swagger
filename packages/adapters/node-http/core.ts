@@ -79,9 +79,9 @@ export const createOpenApiNodeHttpHandler = <
     const path = normalizePath(url.pathname)
     const { procedure, pathInput } = getProcedure(method, path) ?? {}
 
-    let input: any = undefined
-    let ctx: any = undefined
-    let data: any = undefined
+    let input: any
+    let ctx: any
+    let data: any
 
     try {
       if (!procedure) {
@@ -175,10 +175,9 @@ export const createOpenApiNodeHttpHandler = <
         ctx
       })
 
-      const isInputValidationError =
-        error.code === "BAD_REQUEST" &&
-        error.cause instanceof Error &&
-        error.cause.name === "ZodError"
+      const isInputValidationError = error.code === "BAD_REQUEST"
+        && error.cause instanceof Error
+        && error.cause.name === "ZodError"
 
       const statusCode = meta?.status ?? TRPC_ERROR_CODE_HTTP_STATUS[error.code] ?? 500
       const headers = meta?.headers ?? {}

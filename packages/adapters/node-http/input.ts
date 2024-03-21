@@ -19,14 +19,16 @@ export const getQuery = (req: NodeHTTPRequest, url: URL): Record<string, string>
   // normalize first value in array
   Object.keys(req.query).forEach((key) => {
     const value = req.query![key]
-    if (value) {
-      if (typeof value === "string") {
-        query[key] = value
-      } else if (Array.isArray(value)) {
-        if (typeof value[0] === "string") {
-          query[key] = value[0]
-        }
+    if (Array.isArray(value)) {
+      // Destructure to get the first element of the array
+      const [firstValue] = value
+      // Check if the first value is a string and assign it to query
+      if (typeof firstValue === "string") {
+        query[key] = firstValue
       }
+    } else if (typeof value === "string") {
+      // Directly assign the string value to query
+      query[key] = value
     }
   })
 
@@ -55,11 +57,11 @@ export const getBody = async (req: NodeHTTPRequest, maxBodySize = BODY_100_KB): 
         throw new TRPCError({
           message: "Request body too large",
           code: "PAYLOAD_TOO_LARGE",
-          cause: cause
+          cause
         })
       }
 
-      let errorCause: Error | undefined = undefined
+      let errorCause: Error | undefined
       if (cause instanceof Error) {
         errorCause = cause
       }

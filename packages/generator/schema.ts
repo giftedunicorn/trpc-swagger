@@ -47,7 +47,7 @@ export const getParameterObjects = (
     })
   }
 
-  const shape = unwrappedSchema.shape
+  const { shape } = unwrappedSchema
   const shapeKeys = Object.keys(shape)
 
   for (const pathParameter of pathParameters) {
@@ -64,7 +64,7 @@ export const getParameterObjects = (
       const isPathParameter = pathParameters.includes(shapeKey)
       if (inType === "path") {
         return isPathParameter
-      } else if (inType === "query") {
+      } if (inType === "query") {
         return !isPathParameter
       }
       return true
@@ -107,7 +107,7 @@ export const getParameterObjects = (
         in: isPathParameter ? "path" : "query",
         required: isPathParameter || (isRequired && isShapeRequired),
         schema: openApiSchemaObject,
-        description: description,
+        description,
         example: example?.[shapeKey]
       }
     })
@@ -200,7 +200,7 @@ export const getResponsesObject = (
 
   const successResponseObject: OpenAPIV3.ResponseObject = {
     description: "Successful response",
-    headers: headers,
+    headers,
     content: {
       "application/json": {
         schema: zodSchemaToOpenApiSchemaObject(schema),

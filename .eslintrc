@@ -6,7 +6,8 @@
     "plugin:import/typescript",
     "plugin:@typescript-eslint/recommended",
     "plugin:@typescript-eslint/recommended-requiring-type-checking",
-    "plugin:promise/recommended"
+    "plugin:promise/recommended",
+    "airbnb"
   ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
@@ -17,6 +18,13 @@
   },
   "env": {
     "node": true
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx", ".json"]
+      }
+    }
   },
   "rules": {
     "no-var": "error",
@@ -32,6 +40,7 @@
     "keyword-spacing": ["error", { "before": true, "after": true }],
     "no-multiple-empty-lines": ["error", { "max": 1, "maxEOF": 1, "maxBOF": 0 }],
     "@typescript-eslint/no-misused-promises": ["error", { "checksVoidReturn": false }],
+    "import/prefer-default-export": "off",
     "@typescript-eslint/no-unsafe-return": "off",// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-argument": "off",// VERC: changed warn -> off
     "@typescript-eslint/no-unsafe-assignment": "off",  // VERC: changed warn -> off
@@ -46,6 +55,8 @@
     "object-curly-spacing": ["error", "always"],
     "lines-around-directive": "off",
     "no-use-before-define": "off",
+    "no-underscore-dangle": "off",
+    "no-restricted-syntax": "off",
     "object-curly-newline": "off",
     "default-param-last": "off",
     "import/extensions": "off",

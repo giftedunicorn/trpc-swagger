@@ -6,6 +6,7 @@ import { OpenAPIV3 } from "openapi-types"
 import { OpenApiRouter } from "../types"
 import { getOpenApiPathsObject } from "./paths"
 import { errorResponseObject } from "./schema"
+
 export const openApiVersion = "3.0.3"
 
 // Application Sectional || Define Export Type
