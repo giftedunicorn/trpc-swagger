@@ -166,7 +166,6 @@ export const createOpenApiNodeHttpHandler = <
         errors: [error]
       })
 
-      // VERC: Catalog Change - @trpc/server v11.0.0-next-beta.318
       const errorShape = router._def.errorFormatter({
         error,
         type: procedure?.type ?? "unknown",
