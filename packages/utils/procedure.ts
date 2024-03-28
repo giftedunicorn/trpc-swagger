@@ -25,11 +25,12 @@ export const getInputOutputParsers = (procedure: OpenApiProcedure) => {
 }
 
 const getProcedureType = (procedure: OpenApiProcedure): ProcedureType => {
-  if (procedure._def.query) return "query"
-  if (procedure._def.mutation) return "mutation"
-  if (procedure._def.subscription) return "subscription"
-  throw new Error("Unknown procedure type")
-}
+  const allowedProcedureTypes = ['query', 'mutation', 'subscription']
+  if (allowedProcedureTypes.includes(procedure._def.type)) {
+    return procedure._def.type;
+  }
+  throw new Error('Unknown procedure type');
+};
 
 export const forEachOpenApiProcedure = (
   procedureRecord: OpenApiProcedureRecord,
