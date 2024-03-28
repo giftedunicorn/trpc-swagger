@@ -2,7 +2,7 @@
   "name": "@alex8628/trpc-swagger",
   "private": false,
   "license": "MIT",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "tRPC Swagger Wrapper",
   "author": "https://github.com/giftedunicorn",
   "homepage": "https://github.com/giftedunicorn/trpc-swagger",
