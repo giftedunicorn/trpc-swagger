@@ -26,11 +26,11 @@ dependencies:
 
 devDependencies:
   '@trpc/client':
-    specifier: ^10.45.2
-    version: 10.45.2(@trpc/server@10.45.2)
+    specifier: 11.0.0-next-beta.281
+    version: 11.0.0-next-beta.281(@trpc/server@11.0.0-next-beta.281)
   '@trpc/server':
-    specifier: ^10.45.2
-    version: 10.45.2
+    specifier: 11.0.0-next-beta.281
+    version: 11.0.0-next-beta.281
   '@types/aws-lambda':
     specifier: ^8.10.136
     version: 8.10.136
@@ -976,16 +976,16 @@ packages:
       tslib: 2.6.2
     dev: true
 
-  /@trpc/client@10.45.2(@trpc/server@10.45.2):
-    resolution: {integrity: sha512-ykALM5kYWTLn1zYuUOZ2cPWlVfrXhc18HzBDyRhoPYN0jey4iQHEFSEowfnhg1RvYnrAVjNBgHNeSAXjrDbGwg==}
+  /@trpc/client@11.0.0-next-beta.281(@trpc/server@11.0.0-next-beta.281):
+    resolution: {integrity: sha512-pfzG9oyblKW7+RWGryTX4Fa5P/ocgs0CwMRf8TBvNmKBb60MUQs+LSsMTI3YsxA2Z/Eu59kSHnPBUtoGas1Fog==}
     peerDependencies:
-      '@trpc/server': 10.45.2
+      '@trpc/server': 11.0.0-next-beta.281+66d7db60e
     dependencies:
-      '@trpc/server': 10.45.2
+      '@trpc/server': 11.0.0-next-beta.281
     dev: true
 
-  /@trpc/server@10.45.2:
-    resolution: {integrity: sha512-wOrSThNNE4HUnuhJG6PfDRp4L2009KDVxsd+2VYH8ro6o/7/jwYZ8Uu5j+VaW+mOmc8EHerHzGcdbGNQSAUPgg==}
+  /@trpc/server@11.0.0-next-beta.281:
+    resolution: {integrity: sha512-NENm8hARpe1OgVqBZhR4u2iazgR9HAa9KC4d3eXvWYrvESYAJi+Gi/v4lNuqRKFen2nD2LT5YVQyNhcJ1Py4Kg==}
     dev: true
 
   /@tsconfig/node10@1.0.11:

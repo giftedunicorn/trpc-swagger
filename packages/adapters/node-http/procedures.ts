@@ -8,7 +8,7 @@ export const createProcedureCache = (router: OpenApiRouter) => {
     Map<
       RegExp,
       {
-        type: typeof router._def.procedures;
+        type: "query" | "mutation";
         path: string;
         procedure: OpenApiProcedure;
       }
@@ -23,7 +23,7 @@ export const createProcedureCache = (router: OpenApiRouter) => {
     const path = normalizePath(openapi.path)
     const pathRegExp = getPathRegExp(path)
     procedureCache.get(method)!.set(pathRegExp, {
-      type: "query",
+      type: procedure._def.type,
       path: queryPath,
       procedure
     })
