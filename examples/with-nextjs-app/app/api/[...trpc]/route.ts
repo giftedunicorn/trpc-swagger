@@ -1,4 +1,4 @@
-import { createOpenApiFetchHandler } from "trpc-swagger"
+import { createOpenApiFetchHandler } from "../../../../../packages"
 import { appRouter, createContext } from "@/server/router"
 
 // Application Component || Define Handler

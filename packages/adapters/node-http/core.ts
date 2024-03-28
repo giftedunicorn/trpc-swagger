@@ -45,8 +45,8 @@ export const createOpenApiNodeHttpHandler = <
   TRequest extends NodeHTTPRequest,
   TResponse extends NodeHTTPResponse,
 >(
-    opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>
-  ) => {
+  opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>
+) => {
   const router = cloneDeep(opts.router)
 
   // Validate router
