@@ -45,8 +45,8 @@ export const createOpenApiNodeHttpHandler = <
   TRequest extends NodeHTTPRequest,
   TResponse extends NodeHTTPResponse,
 >(
-    opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>
-  ) => {
+  opts: CreateOpenApiNodeHttpHandlerOptions<TRouter, TRequest, TResponse>
+) => {
   const router = cloneDeep(opts.router)
 
   // Validate router
@@ -166,8 +166,7 @@ export const createOpenApiNodeHttpHandler = <
         errors: [error]
       })
 
-      // VERC: Catalog Change - @trpc/server v11.0.0-next-beta.318
-      const errorShape = router.getErrorShape({
+      const errorShape = router._def.errorFormatter({
         error,
         type: procedure?.type ?? "unknown",
         path: procedure?.path,
