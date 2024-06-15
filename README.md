@@ -45,16 +45,16 @@ yarn workspace with-nextjs-app run dev
 **1. Install `trpc-swagger`**
 
 ```bash
-npm install trpc-swagger --save
+npm install @alex8628/trpc-swagger --save
 ```
 ```bash
-yarn add trpc-swagger
+yarn add @alex8628/trpc-swagger
 ```
 ```bash
-pnpm add trpc-swagger
+pnpm add @alex8628/trpc-swagger
 ```
 ```bash
-bun add trpc-swagger
+bun add @alex8628/trpc-swagger
 ```
 
 **2. Add `OpenApiMeta` to your tRPC instance**
